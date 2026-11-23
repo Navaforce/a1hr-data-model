@@ -3,7 +3,7 @@
 Air Force A1 / Total Force HR (Iron Compass) "Art of the Possible" demo, presented Dec 1-2, 2026 (dry runs Nov 30).
 
 ## Purpose of this repo
-A static review page (`index.html`) proposing the data model for the in-scope vignettes. The lead SE approves or requests changes per section and exports the result (JSON or Markdown). The export drives the data model build in the org.
+A static review page (`index.html`) proposing the data model for the in-scope vignettes. The lead SE approves or requests changes per section and exports the result. The export drives the data model build in the org.
 
 ## Scope
 - In: V1 Airman portal, V2 PCS Orders Update (marriage), V4 Leave Request, V5 Fitness Assessment.
