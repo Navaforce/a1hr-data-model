@@ -481,23 +481,36 @@ function scopeSection(){
 }
 
 function erdSection(){
-  const box=(x,y,t,s,c)=>`<g><rect x="${x}" y="${y}" width="210" height="64" rx="10" fill="#fff" stroke="${c}" stroke-width="2"/><text x="${x+105}" y="${y+27}" text-anchor="middle" style="font-weight:700;font-size:13px">${t}</text><text x="${x+105}" y="${y+46}" text-anchor="middle" style="fill:#5b6478;font-size:11px">${s}</text></g>`;
-  const ln=(x1,y1,x2,y2,l,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#00308f" stroke-width="2" ${dash?'stroke-dasharray="6 4"':""}/><text x="${(x1+x2)/2}" y="${(y1+y2)/2-6}" text-anchor="middle" style="font-size:11px;fill:#00308f">${l}</text>`;
+  const W=210,H=64;
+  const box=(x,y,t,s,c)=>`<g><rect x="${x}" y="${y}" width="${W}" height="${H}" rx="8" fill="#fff" stroke="${c}" stroke-width="2"/><text x="${x+W/2}" y="${y+27}" text-anchor="middle" style="font-weight:700;font-size:13px">${t}</text><text x="${x+W/2}" y="${y+46}" text-anchor="middle" style="fill:#5b6478;font-size:11px">${s}</text></g>`;
+  // d = unit vector pointing away from the box at the connection point
+  const foot=(x,y,dx,dy)=>{const px=-dy,py=dx;const bx=x+dx*12,by=y+dy*12;return [[bx,by,x+px*7,y+py*7],[bx,by,x,y],[bx,by,x-px*7,y-py*7]].map(l=>`<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="#00308f" stroke-width="1.8"/>`).join("");};
+  const bar=(x,y,dx,dy)=>{const px=-dy,py=dx;const bx=x+dx*8,by=y+dy*8;return `<line x1="${bx+px*7}" y1="${by+py*7}" x2="${bx-px*7}" y2="${by-py*7}" stroke="#00308f" stroke-width="1.8"/>`;};
+  const lbl=(x,y,t)=>`<g><rect x="${x-t.length*3.2-4}" y="${y-10}" width="${t.length*6.4+8}" height="15" fill="#fbfcff"/><text x="${x}" y="${y+2}" text-anchor="middle" style="font-size:11px;fill:#00308f">${t}</text></g>`;
+  const path=(d,dash)=>`<path d="${d}" fill="none" stroke="#00308f" stroke-width="2" ${dash?'stroke-dasharray="6 4"':""} stroke-linejoin="round"/>`;
+  // edge: path, child end (x,y,dx,dy), parent end (x,y,dx,dy), label pos
+  const E=[
+   ["M485,94 V230",0,[485,94,0,1],[485,230,0,-1],[485,162,"Lookup: Contact"]],
+   ["M730,70 H660 V200 H560 V230",0,[560,230,0,-1],[730,70,-1,0],[660,150,"Lookup: Unit"]],
+   ["M380,62 H135 V230",1,[380,62,-1,0],[135,230,0,-1],[250,56,"Lookup: PCS Order"]],
+   ["M440,30 V10 H-30 V462 H30",1,[30,462,-1,0],[440,30,0,-1],[-30,300,"Source Case"]],
+   ["M240,250 H380",0,[240,250,1,0],[380,250,-1,0],[310,243,"Master-Detail"]],
+   ["M240,462 H310 V282 H380",0,[240,462,1,0],[380,282,-1,0],[345,300,"Master-Detail"]],
+   ["M485,430 V294",0,[485,430,0,-1],[485,294,0,1],[485,375,"Master-Detail"]],
+   ["M730,262 H590",0,[730,262,-1,0],[590,262,1,0],[660,255,"Master-Detail"]],
+   ["M835,294 V430",1,[835,294,0,1],[835,430,0,-1],[835,365,"Lookup: Test Slot"]],
+   ["M940,462 H975 V10 H835 V30",1,[940,462,1,0],[835,30,0,-1],[975,250,"Hosting Unit"]]
+  ];
+  let svg="";
+  E.forEach(e=>{svg+=path(e[0],e[1]);});
+  E.forEach(e=>{const c=e[2],p=e[3];svg+=foot(c[0],c[1],c[2],c[3])+bar(p[0],p[1],p[2],p[3]);});
+  E.forEach(e=>{const l=e[4];svg+=lbl(l[0],l[1],l[2]);});
+  svg+=box(380,30,"Case","Standard · 2 record types","#6b7280")+box(730,30,"Account (Unit)","Standard","#6b7280")
+   +box(30,230,"PCS Order","Custom · addition","#b7791f")+box(380,230,"Contact (Airman)","Standard","#6b7280")+box(730,230,"Fitness Assessment","Custom","#00308f")
+   +box(30,430,"Dependent","Custom · addition","#b7791f")+box(380,430,"Leave Request","Custom","#00308f")+box(730,430,"Fitness Test Slot","Custom · addition","#b7791f");
   return `<section class="card" id="erd">${head("erd","Relationship Diagram")}<div class="body">
-  <svg class="erd" viewBox="0 0 980 520" role="img" aria-label="Entity relationship diagram">
-   ${ln(240,72,380,238,"Lookup")}${ln(740,72,590,238,"Lookup")}
-   ${ln(240,262,380,262,"Master-Detail")}${ln(240,462,380,300,"Master-Detail")}${ln(590,262,730,262,"Master-Detail")}${ln(485,300,485,430,"Master-Detail")}
-   ${ln(835,300,835,430,"Lookup",true)}${ln(240,290,730,92,"",true)}${ln(240,490,730,92,"Source Case",true)}
-   ${box(30,40,"Account (Unit)","Standard","#6b7280")}
-   ${box(740,40,"Case","Standard · 2 record types","#6b7280")}
-   ${box(380,236,"Contact (Airman)","Standard","#6b7280")}
-   ${box(30,230,"PCS Order","Custom · addition","#b7791f")}
-   ${box(30,430,"Dependent","Custom · addition","#b7791f")}
-   ${box(380,430,"Leave Request","Custom","#00308f")}
-   ${box(730,236,"Fitness Assessment","Custom","#00308f")}
-   ${box(730,430,"Fitness Test Slot","Custom · addition","#b7791f")}
-  </svg>
-  <p style="color:#5b6478;font-size:12px">Solid line: master-detail or standard lookup. Dashed: lookup to Case or Slot. Amber outline: proposed addition. Case also looks up to Contact.</p>
+  <svg class="erd" viewBox="-90 0 1190 530" role="img" aria-label="Entity relationship diagram">${svg}</svg>
+  <p style="color:#5b6478;font-size:12px">Crow's foot = many side, bar = one side. Solid line: master-detail. Dashed: lookup. Amber outline: proposed addition.</p>
   </div>${reviewBox("erd")}</section>`;
 }
 
