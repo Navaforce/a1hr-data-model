@@ -102,7 +102,6 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
   <div><h1>A1 HR Demo: Data Model Review</h1><div class="sub">Air Force A1 / Iron Compass &middot; <span id="ver"></span></div></div>
   <div class="prog"><span id="progtxt">0 of 0 reviewed</span><div class="bar"><i id="progbar"></i></div></div>
   <button class="btn" id="expJson">Export JSON</button>
-  <button class="btn" id="expMd">Export Markdown</button>
   <button class="btn ghost" id="impBtn">Import JSON</button>
   <input type="file" id="impFile" accept="application/json" hidden>
   <button class="btn ghost" id="clearBtn">Clear</button>
@@ -592,10 +591,6 @@ document.addEventListener("click",e=>{
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
 function payload(){return {doc:"a1hr-data-model-review",version:DOC_VERSION,exportedAt:new Date().toISOString(),sections:SECTIONS.map(s=>({id:s.id,label:s.label,decision:(STATE[s.id]||{}).d||"none",comment:(STATE[s.id]||{}).c||""}))};}
 document.getElementById("expJson").onclick=()=>download("a1hr-data-model-review.json",JSON.stringify(payload(),null,2),"application/json");
-document.getElementById("expMd").onclick=()=>{
-  const p=payload();const lab={approve:"APPROVED",change:"CHANGE REQUESTED",none:"NOT REVIEWED"};
-  const md=[`# A1 HR Data Model Review`,``,`Version: ${p.version}`,`Exported: ${p.exportedAt}`,``,`| Section | Decision |`,`| --- | --- |`,...p.sections.map(s=>`| ${s.label} | ${lab[s.decision]} |`),``,...p.sections.filter(s=>s.comment.trim()).flatMap(s=>[`## ${s.label} (${lab[s.decision]})`,``,s.comment.trim(),``])].join("\n");
-  download("a1hr-data-model-review.md",md,"text/markdown");};
 document.getElementById("impBtn").onclick=()=>document.getElementById("impFile").click();
 document.getElementById("impFile").onchange=e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
