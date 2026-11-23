@@ -78,15 +78,15 @@ td.ex{color:#14532d;font-weight:600}
 .keys div{border:1px solid #3a5399;border-radius:8px;padding:7px 10px}
 .keys .l{display:block;font-size:11px;color:#b9c6e6;white-space:nowrap}
 .keys .v{display:block;font-weight:700;font-size:13px;white-space:nowrap;overflow:visible}
-.path{display:flex;margin:0 12px 6px;gap:3px;flex-wrap:wrap}
-.path span{padding:6px 14px 6px 18px;background:#e4e9f6;color:#3b4561;font-size:12px;font-weight:600;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%,10px 50%)}
+.path{display:flex;margin:0 12px 6px;gap:3px}
+.path span{flex:1 1 0;text-align:center;padding:8px 14px 8px 18px;background:#e4e9f6;color:#3b4561;font-size:12px;font-weight:600;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%,10px 50%)}
 .path span.done{background:var(--green);color:#fff}.path span.cur{background:var(--af);color:#fff}
 .pills{display:flex;gap:8px;margin:8px 12px}
 .pills button{height:33px;border-radius:999px;border:1px solid #9fb0dc;background:#fff;color:var(--af);font-weight:700;font-size:13px;padding:0 18px;cursor:pointer}
 .pills button.on{background:var(--af);color:#fff;border-color:var(--af)}
 .pane{display:none;padding:4px 12px 14px}.pane.on{display:block}
 .mock h4{margin:10px 0 6px;font-size:13px;color:var(--af);border-bottom:2px solid #dfe5f5;padding-bottom:4px}
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px 22px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px}
 .fg div{border-bottom:1px solid #eef1f8;padding:5px 0}
 .fg .l{display:block;font-size:11px;color:var(--mut)}.fg .v{display:block;font-weight:600}
 .rl{margin-top:10px}
@@ -141,7 +141,7 @@ const OBJECTS=[
 {
  id:"contact",label:"Contact (Airman)",api:"Contact",kind:"Standard",uc:"V1,V2,V4,V5",
  purpose:"The Airman. One Contact per service member, tied to an Experience Cloud user. Carries the landing-page header values (next pay date, report date, fitness status, leave, emergency data review) so the portal and agent read one record. Fitness, leave and orders values roll up from child objects, so adding a record updates the page.",
- rel:"Master of Fitness Assessment, Leave Request, PCS Order and Dependent (master-detail, enables roll-ups). Looks up to Account (unit) and Reports To (commander).",
+ rel:"Master of Fitness Assessment (existing Personnel field), Leave Request and PCS Order (master-detail, enables roll-ups). Linked to dependents through Contact To Contact Relationship. Two record types: Airman, Dependent. Looks up to Account (unit) and Reports To (commander).",
  fields:[
   ["First Name","FirstName","Standard · Text(40)","","Amy","V1"],
   ["Last Name","LastName","Standard · Text(80)","Required","Airman","V1"],
@@ -160,14 +160,18 @@ const OBJECTS=[
   ["Marital Status","Marital_Status__c","Custom · Picklist","Single, Married, Divorced, Widowed. Flipped to Married when the Orders Update is approved","Single","V2"],
   ["DEERS Verified","DEERS_Verified__c","Custom · Checkbox","Seeded; DEERS lookup is mocked","true","V2"],
   ["DEERS Last Verified","DEERS_Last_Verified__c","Custom · Date","","02 Nov 2026","V2"],
-  ["Dependent Count","Dependent_Count__c","Custom · Roll-Up Summary (COUNT)","COUNT of Dependent where Status = Verified","0","V2"],
+  ["Dependent Count","Dependent_Count__c","Custom · Number(2,0)","Set by the flow that creates or verifies a relationship (a roll-up is not possible on a lookup)","0","V2"],
+  ["DEERS Registered","DEERS_Registered__c","Custom · Checkbox","Used on the dependent's Contact","true","V2"],
+  ["DEERS Registration Date","DEERS_Registration_Date__c","Custom · Date","Dependent Contact","04 Nov 2026","V2"],
+  ["ID Card Issued","ID_Card_Issued__c","Custom · Checkbox","Uniformed Services ID card, dependent Contact","true","V2"],
+  ["TRICARE Enrolled","TRICARE_Enrolled__c","Custom · Checkbox","Dependent Contact","true","V2"],
   ["Next Pay Date","Next_Pay_Date__c","Custom · Formula (Date)","Next 1st or 15th on or after today. Weekends not adjusted","01 Dec 2026","V1"],
   ["Next Report Date","Next_Report_Date__c","Custom · Roll-Up Summary (MIN)","MIN of PCS Order Report No Later Than where Status = Active or Amendment Pending","08 Jan 2027","V1,V2"],
   ["Leave Balance (Days)","Leave_Balance_Days__c","Custom · Number(5,1)","Seeded balance","42.5","V1,V4"],
   ["Next Leave Start","Next_Leave_Start__c","Custom · Roll-Up Summary (MIN)","MIN of Leave Request Start Date where Status = Approved. Past leave moves to Completed so it drops out","21 Dec 2026","V1,V4"],
   ["Pending Leave Requests","Pending_Leave_Count__c","Custom · Roll-Up Summary (COUNT)","COUNT of Leave Request where Status = Pending Approval","1","V1,V4"],
-  ["Last Fitness Assessment","Last_Fitness_Assessment_Date__c","Custom · Roll-Up Summary (MAX)","MAX of Fitness Assessment Assessment Date where Status = Completed","02 Dec 2025","V1,V5"],
-  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MIN)","MIN of Fitness Assessment Scheduled Date/Time where Status = Scheduled. Blank when none booked","Blank until scheduled","V5"],
+  ["Last Fitness Assessment","Last_Fitness_Assessment_Date__c","Custom · Roll-Up Summary (MAX)","MAX of Fitness Assessment Completion Date where Fitness Assessment Status = Completed","02 Dec 2025","V1,V5"],
+  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MIN)","MIN of Fitness Assessment Requested Assessment Date where Fitness Assessment Status = Scheduled. Blank when none booked","Blank until scheduled","V5"],
   ["Next Fitness Due Date","Next_Fitness_Due_Date__c","Custom · Formula (Date)","Last Fitness Assessment + 365 days; today if none on file","02 Dec 2026","V1,V5"],
   ["Fitness Status","Fitness_Status__c","Custom · Formula (Text)","Scheduled, Overdue, Due Within 30 Days, Current","Due Within 30 Days","V1,V5"],
   ["Emergency Data Last Reviewed","AFPAAS_Last_Reviewed__c","Custom · Date","AFPAAS emergency data review","15 Jan 2026","V1"],
@@ -175,7 +179,7 @@ const OBJECTS=[
   ["Emergency Data Status","AFPAAS_Status__c","Custom · Formula (Text)","Current, Due Soon, Overdue","Current","V1"],
   ["Photo URL","Photo_URL__c","Custom · URL(255)","Headshot for portal and slides","/resource/amy_airman","V1"]
  ],
- notes:["Next Fitness Appointment is a MIN roll-up of Scheduled assessments.","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all four child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
+ notes:["Next Fitness Appointment is a MIN roll-up of Scheduled assessments.","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all three child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
  layout:{glyph:"✈",title:"Amy Airman",badges:[["Present For Duty","Current duty status from the Contact record."],["Fitness: Due Within 30 Days","Next due date is within 30 days. Turns Scheduled once an appointment is booked."],["Emergency Data: Current","Emergency data was reviewed within the last 12 months."]],
   keys:[["Rank","E-5 Staff Sergeant"],["Next Pay Date","01 Dec 2026"],["Report Date","08 Jan 2027"],["Next Fitness Due","02 Dec 2026"],["Next Leave","21 Dec 2026"],["Leave Balance","42.5 days"]],
   sections:[["Service Member",["FirstName","LastName","Rank__c","AFSC__c","Service_Component__c","DoD_ID__c","AccountId","ReportsToId"]],["Landing Page Values",["Next_Pay_Date__c","Next_Report_Date__c","Next_Fitness_Due_Date__c","Fitness_Status__c","Next_Leave_Start__c","Leave_Balance_Days__c","AFPAAS_Review_Due__c","AFPAAS_Status__c"]],["Family And Benefits",["Marital_Status__c","DEERS_Verified__c","DEERS_Last_Verified__c","Dependent_Count__c"]]],
@@ -215,32 +219,29 @@ const OBJECTS=[
   related:[{title:"Amendment Cases",cols:["Subject","Event","Status","Opened"],rows:[["Orders Update For Marriage","Marriage","In Review","23 Nov 2026"]]}]}
 },
 {
- id:"dependent",label:"Dependent",api:"Dependent__c",kind:"Custom",uc:"V2",
- purpose:"Spouse and child records collected by the agent interview in Vignette 2 (name, DEERS registration, traveling with member). Created against the Orders Update case and attached to the Airman once approved.",
- rel:"Master-detail to Contact. Lookup to Case (source case).",
- added:true,
+ id:"dependent",label:"Contact To Contact Relationship (Dependents)",api:"ContactContactRelation",kind:"Standard",uc:"V2",
+ purpose:"Replaces the proposed Dependent custom object. A spouse or child is a Contact record (Contact record type Dependent) linked to the Airman through a Contact To Contact Relationship of type Spouse or Child. The agent interview in Vignette 2 creates the spouse Contact and the relationship, both tied to the Orders Update case. Person-level facts (DEERS, ID card, TRICARE) sit on the dependent's Contact. Facts about the link (traveling with member, travel date, verification) sit on the relationship.",
+ rel:"Two Contact lookups (the Airman and the dependent) plus a Relationship Type. Lookup to Case for the source case. A Roll-Up Summary is not possible on a lookup, so Dependent Count on the Airman is kept by the same flow that creates the relationship.",
  fields:[
-  ["Dependent Name","Name","Standard · Text(80)","Set by flow: First Last","Jordan Airman","V2"],
-  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Amy Airman","V2"],
-  ["Source Case","Source_Case__c","Custom · Lookup(Case)","Orders Update that created it","Orders Update For Marriage","V2"],
-  ["First Name","First_Name__c","Custom · Text(40)","Parsed from the agent's spouse name answer","Jordan","V2"],
-  ["Last Name","Last_Name__c","Custom · Text(80)","","Airman","V2"],
-  ["Relationship","Relationship__c","Custom · Picklist","Spouse, Child, Stepchild, Other","Spouse","V2"],
-  ["Date Of Birth","Date_Of_Birth__c","Custom · Date","","03 Sep 1997","V2"],
-  ["Age","Age__c","Custom · Formula (Number)","Years since Date Of Birth","29","V2"],
-  ["Marriage Date","Marriage_Date__c","Custom · Date","Spouse only","20 Oct 2026","V2"],
-  ["DEERS Registered","DEERS_Registered__c","Custom · Checkbox","Airman confirms in chat","true","V2"],
-  ["DEERS Registration Date","DEERS_Registration_Date__c","Custom · Date","","04 Nov 2026","V2"],
-  ["ID Card Issued","ID_Card_Issued__c","Custom · Checkbox","Uniformed Services ID card","true","V2"],
-  ["TRICARE Enrolled","TRICARE_Enrolled__c","Custom · Checkbox","","true","V2"],
+  ["Relationship Name","Name","Standard · Auto Number","System generated","CCR-0000031","V2"],
+  ["Airman","ContactId","Standard · Lookup(Contact)","Airman side of the link. Verify the field name in the org","Amy Airman","V2"],
+  ["Dependent","RelatedContactId","Standard · Lookup(Contact)","The spouse or child Contact","Jordan Airman","V2"],
+  ["Relationship Type","RelationshipTypeId","Standard · Lookup(Relationship Type)","Spouse, Child, Stepchild, Other","Spouse","V2"],
+  ["Start Date","StartDate","Standard · Date","Marriage date for a spouse, birth date for a child","20 Oct 2026","V2"],
+  ["End Date","EndDate","Standard · Date","Divorce or age-out","Blank","V2"],
+  ["Is Active","IsActive","Standard · Checkbox","","true","V2"],
+  ["Dependent Status","Dependent_Status__c","Custom · Picklist","Pending Verification, Verified, Removed","Pending Verification","V2"],
   ["Traveling With Member","Traveling_With_Member__c","Custom · Checkbox","Agent question","true","V2"],
   ["Planned Travel Date","Planned_Travel_Date__c","Custom · Date","","15 Dec 2026","V2"],
-  ["Status","Status__c","Custom · Picklist","Pending Verification, Verified, Removed","Pending Verification","V2"]
+  ["Source Case","Source_Case__c","Custom · Lookup(Case)","Orders Update that created it","Orders Update For Marriage","V2"],
+  ["Verified By","Verified_By__c","Custom · Lookup(User)","Case manager","Case Manager","V2"],
+  ["Verified On","Verified_On__c","Custom · Date","","Blank","V2"],
+  ["Entitlement Impact","Entitlement_Impact__c","Custom · Text(255)","Plain-language effect shown on the case","Adds dependent travel and housing entitlements.","V2"]
  ],
- notes:["Marriage certificate upload and Document AI are out of scope for this vignette (decision from the 23 Nov meeting: DEERS already holds it). The canvas still mentions it. See Decisions.","Alternative: store spouse fields directly on Case and skip this object. A separate object is proposed because the second dependent (child) case needs repeating rows and the Contact needs a dependent count."],
- layout:{glyph:"♡",title:"Jordan Airman",badges:[["Pending Verification","Case manager has not yet verified this dependent against DEERS."],["Spouse","Relationship to the Airman."]],
-  keys:[["Airman","Amy Airman"],["DEERS Registered","Yes"],["Traveling With Member","Yes"],["Planned Travel","15 Dec 2026"]],
-  sections:[["Identity",["First_Name__c","Last_Name__c","Relationship__c","Date_Of_Birth__c","Age__c","Marriage_Date__c"]],["Eligibility",["DEERS_Registered__c","DEERS_Registration_Date__c","ID_Card_Issued__c","TRICARE_Enrolled__c","Status__c"]],["Travel",["Traveling_With_Member__c","Planned_Travel_Date__c","Source_Case__c"]]],
+ notes:["Decision from David: use the Contact to Contact relationship, not a Dependent custom object. It needs verification in the org that Contact To Contact Relationship is enabled for this Public Sector IDO and accepts custom fields. If not, the fallback is the Dependent custom object from draft v0.1.","The dependent Contact gets a Dependent record type and these extra Contact fields: DEERS Registered, DEERS Registration Date, ID Card Issued, TRICARE Enrolled, Date Of Birth (standard Birthdate). They are listed on the Contact section.","Dependent Count on the Airman is a number maintained by the flow, because roll-ups require master-detail."],
+ layout:{glyph:"♡",title:"Amy Airman and Jordan Airman",badges:[["Pending Verification","Case manager has not yet verified this dependent against DEERS."],["Spouse","Relationship type."]],
+  keys:[["Airman","Amy Airman"],["Dependent","Jordan Airman"],["Traveling With Member","Yes"],["Planned Travel","15 Dec 2026"]],
+  sections:[["Relationship",["ContactId","RelatedContactId","RelationshipTypeId","StartDate","EndDate","IsActive"]],["Verification",["Dependent_Status__c","Verified_By__c","Verified_On__c","Source_Case__c"]],["Travel",["Traveling_With_Member__c","Planned_Travel_Date__c","Entitlement_Impact__c"]]],
   related:[{title:"Cases",cols:["Subject","Status","Opened"],rows:[["Orders Update For Marriage","In Review","23 Nov 2026"]]}]}
 },
 {
@@ -277,7 +278,7 @@ const OBJECTS=[
   path:{values:["New","In Review","Approved","Closed"],current:1},
   keys:[["Case Number","00003106"],["Airman","Amy Airman"],["Qualifying Event","Marriage"],["Event Date","20 Oct 2026"],["Review Status","Pending Approval"]],
   sections:[["Request",["Subject","Service_Category__c","Qualifying_Event__c","Qualifying_Event_Date__c","Related_PCS_Order__c","Origin"]],["Interview Answers",["DEERS_Update_Confirmed__c","Spouse_Traveling_With_Member__c","Planned_Travel_Start__c","Planned_Travel_End__c","Additional_Dependents_Count__c"]],["Review And Approval",["Orders_Review_Status__c","DEERS_Match_Verified__c","Approval_Decision_Date__c","Amended_Orders_Reference__c"]],["Summary",["Agent_Conversation_Summary__c"]]],
-  related:[{title:"Dependents",cols:["Name","Relationship","DEERS Registered","Status"],rows:[["Jordan Airman","Spouse","Yes","Pending Verification"]]}]}
+  related:[{title:"Dependent Relationships",cols:["Dependent","Relationship","Traveling","Status"],rows:[["Jordan Airman","Spouse","Yes","Pending Verification"]]}]}
 },
 {
  id:"leave",label:"Leave Request",api:"Leave_Request__c",kind:"Custom",uc:"V1,V4",
@@ -312,37 +313,47 @@ const OBJECTS=[
 },
 {
  id:"fitness",label:"Fitness Assessment",api:"Fitness_Assessment__c",kind:"Custom",uc:"V1,V5",
- purpose:"One record per assessment, scheduled or completed. Completed records roll up to the Contact so the Next Due Date updates for real. Scheduling creates a record in Scheduled status, which flips the landing page from due date to appointment date. Holds component results so the agent can answer last-score and improvement questions.",
- rel:"Master-detail to Contact. Lookup to Fitness Test Slot.",
+ purpose:"Reuse of the Fitness Assessment object already in Eric's a1agent org (31 fields, read from the org on 23 Nov 2026). One record per assessment, scheduled or completed. Completed records roll up to the Contact so the next due date updates for real. Scheduling creates a record with a Requested Assessment Date, which flips the landing page from due date to appointment date. Fields marked Existing are in the org today; fields marked New are the additions this demo needs.",
+ rel:"Master-detail to Contact through the existing Personnel field. Lookup to Base (Account) exists. Related existing objects: Fitness Assessment Appeal and Fitness Improvement Plan.",
  fields:[
-  ["Assessment Title","Name","Standard · Text(80)","Set by flow, Title Case","Fitness Assessment: 02 Dec 2025","V5"],
-  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Amy Airman","V1,V5"],
-  ["Status","Status__c","Custom · Picklist","Scheduled, Completed, Cancelled, No Show","Completed","V1,V5"],
-  ["Scheduled Date/Time","Scheduled_Date_Time__c","Custom · Date/Time","Rolls up (MIN) to Contact for Scheduled records","Blank","V5"],
-  ["Test Slot","Test_Slot__c","Custom · Lookup(Fitness Test Slot)","Chosen by the Airman in the form","Travis Fitness Center: 14 Dec 2026 0800","V5"],
-  ["Assessment Date","Assessment_Date__c","Custom · Date","Date performed. Rolls up (MAX) for Completed records","02 Dec 2025","V1,V5"],
-  ["Age At Assessment","Age_At_Assessment__c","Custom · Number(3,0)","Scoring bracket input","27","V5"],
-  ["Cardio Event","Cardio_Event__c","Custom · Picklist","2-Mile Run, 20-Meter HAMR","2-Mile Run","V5"],
-  ["Cardio Result","Cardio_Result__c","Custom · Text(20)","Time or shuttle count","16:42","V5"],
-  ["Cardio Points","Cardio_Points__c","Custom · Number(4,1)","","46.0","V5"],
-  ["Push-Up Reps","Pushup_Reps__c","Custom · Number(3,0)","","32","V5"],
-  ["Push-Up Points","Pushup_Points__c","Custom · Number(4,1)","","14.0","V5"],
-  ["Core Event","Core_Event__c","Custom · Picklist","Sit-Ups, Cross-Leg Reverse Crunch, Forearm Plank","Cross-Leg Reverse Crunch","V5"],
-  ["Core Result","Core_Result__c","Custom · Text(20)","","38","V5"],
-  ["Core Points","Core_Points__c","Custom · Number(4,1)","","12.5","V5"],
-  ["Waist (Inches)","Waist_Inches__c","Custom · Number(4,1)","","31.5","V5"],
-  ["Body Composition Points","Body_Comp_Points__c","Custom · Number(4,1)","","20.0","V5"],
-  ["Composite Score","Composite_Score__c","Custom · Formula (Number)","Cardio + Push-Up + Core + Body Composition points","92.5","V1,V5"],
-  ["Rating","Rating__c","Custom · Formula (Text)","Excellent 90 or higher, Satisfactory 75 to 89.9, Unsatisfactory below 75. Thresholds to confirm against the source tables Tarek loads","Excellent","V1,V5"],
-  ["Next Due Date","Next_Due_Date__c","Custom · Formula (Date)","Assessment Date + 365 (Completed only)","02 Dec 2026","V5"],
-  ["Proctor","Proctor__c","Custom · Text(80)","","TSgt Morgan Lee","V5"]
+  ["Assessment Number","Name","Existing · Auto Number","Existing as an auto number. Demo names are system-generated, which is the one exception to the Title Case naming rule","FA-0000412","V5"],
+  ["Personnel","Personnel__c","Existing · Master-Detail(Contact)","Airman. Same master-detail pattern the roll-ups need","Amy Airman","V1,V5"],
+  ["Base","Base__c","Existing · Lookup(Account)","Testing base","Travis AFB","V5"],
+  ["Fitness Assessment Status","Fitness_Assessment_Status__c","Existing · Picklist","Values to confirm in the org; proposed set: Scheduled, Completed, Cancelled, No Show","Completed","V1,V5"],
+  ["Requested Assessment Date","Requested_Assessment_Date__c","Existing · Date/Time","Appointment the Airman books. Rolls up (MIN) to Contact for Scheduled records","14 Dec 2026 08:00","V5"],
+  ["Completion Date","Completion_Date__c","Existing · Date/Time","When the test was performed. Rolls up (MAX) for Completed records","02 Dec 2025 09:15","V1,V5"],
+  ["Fitness Assessment Due Date","Fitness_Assessment_Due_Date__c","Existing · Date","Existing as a plain date. Proposal: keep as the stored due date and have the flow set it to Completion Date + 365","02 Dec 2026","V1,V5"],
+  ["Fitness Category","Fitness_Category__c","Existing · Picklist","Rating bands; values to confirm","Excellent","V1,V5"],
+  ["Composite Score","Composite_Score__c","Existing · Number(3,1)","","92.5","V1,V5"],
+  ["Cardio Test","Cardio_Test__c","Existing · Picklist","2-Mile Run, 20-Meter HAMR, USAF Walk (values to confirm)","2-Mile Run","V5"],
+  ["Cardio Time","Cardio_Time__c","Existing · Text(10)","","16:42","V5"],
+  ["Cardio Score","Cardio_Score__c","Existing · Number(3,1)","","46.0","V5"],
+  ["Cardio Health Risk Category","Cardio_Health_Risk_Category__c","Existing · Picklist","","Low","V5"],
+  ["Shuttle Number","Shuttle_Number__c","Existing · Number(3,0)","HAMR shuttle count","0","V5"],
+  ["USAF Walk Score","USAF_Walk_Score__c","Existing · Picklist","","Pass","V5"],
+  ["1 Min Push-Ups","X1_Min_Push_ups__c","Existing · Number(2,0)","","32","V5"],
+  ["1 Min Push-Up Score","X1_Min_Push_up_Score__c","Existing · Number(3,1)","","14.0","V5"],
+  ["2 Min HR Push-Ups","X2_Min_HR_Push_ups__c","Existing · Number(2,0)","Hand-release push-ups","28","V5"],
+  ["2 Min HR Push-Up Score","X2_Min_HR_Push_up_Score__c","Existing · Number(3,1)","","13.5","V5"],
+  ["1 Min Sit-Ups","X1_Min_Sit_ups__c","Existing · Number(2,0)","","40","V5"],
+  ["1 Min Sit-Up Score","X1_Min_Sit_up_Score__c","Existing · Number(3,1)","","12.0","V5"],
+  ["2 Min CLRC","X2_Min_CLRC__c","Existing · Number(2,0)","Cross-leg reverse crunch","38","V5"],
+  ["2 Min CLRC Score","X2_Min_CLRC_Score__c","Existing · Number(3,1)","","12.5","V5"],
+  ["Forearm Plank Time","Forearm_Plank_Time__c","Existing · Text(10)","","2:10","V5"],
+  ["Forearm Plank Score","Forearm_Plank_Score__c","Existing · Number(3,1)","","13.0","V5"],
+  ["Altitude","Altitude__c","Existing · Number(3,0)","Altitude adjustment for scoring","0","V5"],
+  ["DNF","DNF__c","Existing · Checkbox","Did not finish","false","V5"],
+  ["Diagnostic Test","Diagnostic_Test__c","Existing · Picklist","","No","V5"],
+  ["Test Slot","Test_Slot__c","New · Lookup(Fitness Test Slot)","Chosen by the Airman in the booking form","Travis Fitness Center: 14 Dec 2026 0800","V5"],
+  ["Proctor","Proctor__c","New · Text(80)","","TSgt Morgan Lee","V5"],
+  ["Is Upcoming","Is_Upcoming__c","New · Formula (Checkbox)","Status is Scheduled and Requested Assessment Date is in the future","false","V1,V5"]
  ],
- notes:["Eric has an existing Fitness Assessment object in another demo (a1agent). It needs an emailed code to open, so field names here are designed from scratch. If that object is reachable later we align names rather than rebuild.","Scoring is age and sex dependent. The agent answers max score and improvement questions from the unstructured policy documents, not from this object.","Next Due is +365 per the meeting. If policy gives different cycles by rating, change the formula on approval."],
- layout:{glyph:"★",title:"Fitness Assessment: 02 Dec 2025",badges:[["Completed","Assessment was performed and scored."],["Excellent","Rating derived from the composite score."]],
+ notes:["Read from the a1agent org: the existing object already uses Personnel as master-detail to Contact, so the roll-ups work with no model change. Existing field API names are kept so this can be moved between orgs.","Existing picklist values were not read. Items marked 'to confirm' will be checked against the org before the build.","Existing, not in this demo's first draft: Fitness Assessment Appeal and Fitness Improvement Plan objects. Not modeled here. Ask the lead SE whether either belongs in the demo.","Next Due Date and the Contact roll-ups read Completion Date and Requested Assessment Date. If policy gives different cycles by rating, change the flow that sets the due date."],
+ layout:{glyph:"★",title:"FA-0000412",badges:[["Completed","Assessment was performed and scored."],["Excellent","Fitness category derived from the composite score."]],
   path:{values:["Scheduled","Completed"],current:1,done:true},
-  keys:[["Airman","Amy Airman"],["Assessment Date","02 Dec 2025"],["Composite Score","92.5"],["Rating","Excellent"],["Next Due","02 Dec 2026"]],
-  sections:[["Result",["Assessment_Date__c","Age_At_Assessment__c","Composite_Score__c","Rating__c","Next_Due_Date__c","Proctor__c"]],["Components",["Cardio_Event__c","Cardio_Result__c","Cardio_Points__c","Pushup_Reps__c","Pushup_Points__c","Core_Event__c","Core_Result__c","Core_Points__c","Waist_Inches__c","Body_Comp_Points__c"]],["Scheduling",["Status__c","Scheduled_Date_Time__c","Test_Slot__c"]]],
-  related:[{title:"Assessment History",cols:["Assessment","Date","Score","Rating"],rows:[["Fitness Assessment: 02 Dec 2025","02 Dec 2025","92.5","Excellent"],["Fitness Assessment: 11 Nov 2024","11 Nov 2024","88.0","Satisfactory"],["Fitness Assessment: 05 Dec 2023","05 Dec 2023","90.5","Excellent"]]}]}
+  keys:[["Personnel","Amy Airman"],["Completed","02 Dec 2025"],["Composite Score","92.5"],["Category","Excellent"],["Next Due","02 Dec 2026"]],
+  sections:[["Result",["Completion_Date__c","Composite_Score__c","Fitness_Category__c","Fitness_Assessment_Due_Date__c","Base__c","Proctor__c"]],["Components",["Cardio_Test__c","Cardio_Time__c","Cardio_Score__c","X1_Min_Push_ups__c","X1_Min_Push_up_Score__c","X1_Min_Sit_ups__c","X1_Min_Sit_up_Score__c","Forearm_Plank_Time__c","Forearm_Plank_Score__c"]],["Scheduling",["Fitness_Assessment_Status__c","Requested_Assessment_Date__c","Test_Slot__c"]]],
+  related:[{title:"Assessment History",cols:["Assessment","Completed","Score","Category"],rows:[["FA-0000412","02 Dec 2025","92.5","Excellent"],["FA-0000298","11 Nov 2024","88.0","Satisfactory"],["FA-0000151","05 Dec 2023","90.5","Excellent"]]}]}
 },
 {
  id:"slot",label:"Fitness Test Slot",api:"Fitness_Test_Slot__c",kind:"Custom",uc:"V5",
@@ -476,7 +487,7 @@ function scopeSection(){
     <li>PCS order changes are a Case record type.</li>
     <li>Portal and record pages are fully custom coded.</li>
     <li>Downstream integrations (ARROWS, FM travel voucher, DEERS, DPS) are described in the talk track, not built.</li></ul>
-   <h3>Summary</h3><p>3 standard objects (Account, Contact, Case) with 6 + 31 + 22 fields listed, 5 custom objects. Three of the five custom objects are additions beyond the canvas: PCS Order, Dependent, Fitness Test Slot. Each is flagged and can be rejected independently.</p>
+   <h3>Summary</h3><p>Standard objects: Account, Contact, Case, Contact To Contact Relationship. Custom objects: PCS Order, Leave Request, Fitness Assessment (already in the a1agent org) and Fitness Test Slot. PCS Order and Fitness Test Slot are additions beyond the canvas and can be rejected independently. Dependents are Contacts, per David.</p>
    </div>${reviewBox("scope")}</section>`;
 }
 
@@ -495,7 +506,7 @@ function erdSection(){
    ["M380,62 H135 V230",1,[380,62,-1,0],[135,230,0,-1],[250,56,"Lookup: PCS Order"]],
    ["M440,30 V10 H-30 V462 H30",1,[30,462,-1,0],[440,30,0,-1],[-30,300,"Source Case"]],
    ["M240,250 H380",0,[240,250,1,0],[380,250,-1,0],[310,243,"Master-Detail"]],
-   ["M240,462 H310 V282 H380",0,[240,462,1,0],[380,282,-1,0],[345,300,"Master-Detail"]],
+   ["M240,462 H310 V282 H380",1,[240,462,1,0],[380,282,-1,0],[345,300,"Lookup: Airman"]],
    ["M485,430 V294",0,[485,430,0,-1],[485,294,0,1],[485,375,"Master-Detail"]],
    ["M730,262 H590",0,[730,262,-1,0],[590,262,1,0],[660,255,"Master-Detail"]],
    ["M835,294 V430",1,[835,294,0,1],[835,430,0,-1],[835,365,"Lookup: Test Slot"]],
@@ -507,15 +518,15 @@ function erdSection(){
   E.forEach(e=>{const l=e[4];svg+=lbl(l[0],l[1],l[2]);});
   svg+=box(380,30,"Case","Standard · 2 record types","#6b7280")+box(730,30,"Account (Unit)","Standard","#6b7280")
    +box(30,230,"PCS Order","Custom · addition","#b7791f")+box(380,230,"Contact (Airman)","Standard","#6b7280")+box(730,230,"Fitness Assessment","Custom","#00308f")
-   +box(30,430,"Dependent","Custom · addition","#b7791f")+box(380,430,"Leave Request","Custom","#00308f")+box(730,430,"Fitness Test Slot","Custom · addition","#b7791f");
+   +box(30,430,"Contact Relationship","Standard · dependents","#6b7280")+box(380,430,"Leave Request","Custom","#00308f")+box(730,430,"Fitness Test Slot","Custom · addition","#b7791f");
   return `<section class="card" id="erd">${head("erd","Relationship Diagram")}<div class="body">
   <svg class="erd" viewBox="-90 0 1190 530" role="img" aria-label="Entity relationship diagram">${svg}</svg>
-  <p style="color:#5b6478;font-size:12px">Crow's foot = many side, bar = one side. Solid line: master-detail. Dashed: lookup. Amber outline: proposed addition.</p>
+  <p style="color:#5b6478;font-size:12px">Crow's foot = many side, bar = one side. Solid line: master-detail. Dashed: lookup, including the dependent link to Contact. Amber outline: proposed addition.</p>
   </div>${reviewBox("erd")}</section>`;
 }
 
 function accessSection(){
-  const rows=[["Airman portal user","Experience Cloud user linked to the Airman Contact","Reads own Contact, Cases, Leave, Fitness, PCS, Dependents. Creates Leave and Cases. Cannot see other Airmen."],["Case manager","Internal Salesforce user, console app","Cases, Contacts, all four child objects. Approver for Leave and Orders Update."],["Agents (Tarek)","Service agent (portal) and employee agent (console)","Run as the agent user; actions read Contact, Fitness, Leave, PCS and create Case, Leave, Dependent, Fitness Assessment."]];
+  const rows=[["Airman portal user","Experience Cloud user linked to the Airman Contact","Reads own Contact, Cases, Leave, Fitness, PCS and dependent relationships. Creates Leave and Cases. Cannot see other Airmen."],["Case manager","Internal Salesforce user, console app","Cases, Contacts, all four child objects. Approver for Leave and Orders Update."],["Agents (Tarek)","Service agent (portal) and employee agent (console)","Run as the agent user; actions read Contact, Fitness, Leave, PCS and create Case, Leave, dependent Contact and relationship, Fitness Assessment."]];
   return `<section class="card" id="access">${head("access","Identity And Access")}<div class="body">
    <p>Permissions are assigned in the same deploy as each object. Nothing is built until this section is approved.</p>
    ${sortTable(["Who","Account type","Access"],rows)}
@@ -525,7 +536,7 @@ function accessSection(){
 }
 
 function decisionsSection(){
-  const d=[["Leave vignette","Rob commented on the canvas that Leave may not be needed because it repeats the PCS amendment pattern. The meeting notes keep it in scope. This model includes Leave.","Confirm keep or drop"],["Marriage certificate","The canvas has the case manager comparing an uploaded certificate to DEERS. The meeting excluded the upload. This model has no certificate fields; the case manager checks DEERS Match Verified instead.","Confirm excluded"],["Proposed additions","PCS Order, Dependent, Fitness Test Slot are not on the canvas list.","Approve each with its section"],["Fitness object reuse","Eric's existing Fitness Assessment object lives in another org that needs an emailed code. Fields here are new.","Align names later if reachable"],["Next due cycle","Next Due = last assessment + 365 days. Policy may vary by rating.","Keep 365 or change"],["Console announcements","The case manager home page shows announcements. Not modeled; proposed as a simple CMS or list component outside this data model.","Confirm"],["Unit commander","Approver is a User lookup so approval routing works. Commander as a Contact stays informational.","Confirm"],["Record names","Name fields on custom objects are text set by flow (Title Case, no IDs) rather than auto-numbers.","Confirm"],["Example data","Names, bases and numbers are illustrative. Real units and bases are used; people and ID numbers are fictional.","Confirm golden record later"]];
+  const d=[["Leave vignette","Rob commented on the canvas that Leave may not be needed because it repeats the PCS amendment pattern. The meeting notes keep it in scope. This model includes Leave.","Confirm keep or drop"],["Marriage certificate","The canvas has the case manager comparing an uploaded certificate to DEERS. The meeting excluded the upload. This model has no certificate fields; the case manager checks DEERS Match Verified instead.","Confirm excluded"],["Proposed additions","PCS Order and Fitness Test Slot are not on the canvas list.","Approve each with its section"],["Dependents as Contacts","David chose Contact To Contact Relationship over a Dependent custom object. Needs a check that the relationship object is enabled in this org.","Confirm, fallback is a custom object"],["Fitness object reuse","Read from Eric's a1agent org: Fitness Assessment (31 fields), Fitness Assessment Appeal and Fitness Improvement Plan exist. This model reuses Fitness Assessment with its existing field names and adds 3 fields.","Confirm reuse, and say whether Appeal and Improvement Plan are in the demo"],["Next due cycle","Next Due = last assessment + 365 days. Policy may vary by rating.","Keep 365 or change"],["Console announcements","The case manager home page shows announcements. Not modeled; proposed as a simple CMS or list component outside this data model.","Confirm"],["Unit commander","Approver is a User lookup so approval routing works. Commander as a Contact stays informational.","Confirm"],["Record names","Name fields on custom objects are text set by flow (Title Case, no IDs) rather than auto-numbers.","Confirm"],["Example data","Names, bases and numbers are illustrative. Real units and bases are used; people and ID numbers are fictional.","Confirm golden record later"]];
   return `<section class="card" id="decisions">${head("decisions","Open Decisions")}<div class="body">${sortTable(["Topic","What we found","Ask"],d.map(r=>r))}</div>${reviewBox("decisions")}</section>`;
 }
 
