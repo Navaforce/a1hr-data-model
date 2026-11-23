@@ -167,7 +167,7 @@ const OBJECTS=[
   ["Next Leave Start","Next_Leave_Start__c","Custom · Roll-Up Summary (MIN)","MIN of Leave Request Start Date where Status = Approved. Past leave moves to Completed so it drops out","21 Dec 2026","V1,V4"],
   ["Pending Leave Requests","Pending_Leave_Count__c","Custom · Roll-Up Summary (COUNT)","COUNT of Leave Request where Status = Pending Approval","1","V1,V4"],
   ["Last Fitness Assessment","Last_Fitness_Assessment_Date__c","Custom · Roll-Up Summary (MAX)","MAX of Fitness Assessment Assessment Date where Status = Completed","02 Dec 2025","V1,V5"],
-  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MAX)","MIN of Fitness Assessment Scheduled Date/Time where Status = Scheduled. Blank when none booked","Blank until scheduled","V5"],
+  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MIN)","MIN of Fitness Assessment Scheduled Date/Time where Status = Scheduled. Blank when none booked","Blank until scheduled","V5"],
   ["Next Fitness Due Date","Next_Fitness_Due_Date__c","Custom · Formula (Date)","Last Fitness Assessment + 365 days; today if none on file","02 Dec 2026","V1,V5"],
   ["Fitness Status","Fitness_Status__c","Custom · Formula (Text)","Scheduled, Overdue, Due Within 30 Days, Current","Due Within 30 Days","V1,V5"],
   ["Emergency Data Last Reviewed","AFPAAS_Last_Reviewed__c","Custom · Date","AFPAAS emergency data review","15 Jan 2026","V1"],
@@ -175,7 +175,7 @@ const OBJECTS=[
   ["Emergency Data Status","AFPAAS_Status__c","Custom · Formula (Text)","Current, Due Soon, Overdue","Current","V1"],
   ["Photo URL","Photo_URL__c","Custom · URL(255)","Headshot for portal and slides","/resource/amy_airman","V1"]
  ],
- notes:["Next Fitness Appointment is a MIN roll-up. The type column says MAX by mistake in no case: use MIN.","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all four child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
+ notes:["Next Fitness Appointment is a MIN roll-up of Scheduled assessments.","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all four child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
  layout:{glyph:"✈",title:"Amy Airman",badges:[["Present For Duty","Current duty status from the Contact record."],["Fitness: Due Within 30 Days","Next due date is within 30 days. Turns Scheduled once an appointment is booked."],["Emergency Data: Current","Emergency data was reviewed within the last 12 months."]],
   keys:[["Rank","E-5 Staff Sergeant"],["Next Pay Date","01 Dec 2026"],["Report Date","08 Jan 2027"],["Next Fitness Due","02 Dec 2026"],["Next Leave","21 Dec 2026"],["Leave Balance","42.5 days"]],
   sections:[["Service Member",["FirstName","LastName","Rank__c","AFSC__c","Service_Component__c","DoD_ID__c","AccountId","ReportsToId"]],["Landing Page Values",["Next_Pay_Date__c","Next_Report_Date__c","Next_Fitness_Due_Date__c","Fitness_Status__c","Next_Leave_Start__c","Leave_Balance_Days__c","AFPAAS_Review_Due__c","AFPAAS_Status__c"]],["Family And Benefits",["Marital_Status__c","DEERS_Verified__c","DEERS_Last_Verified__c","Dependent_Count__c"]]],
