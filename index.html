@@ -92,6 +92,11 @@ td.ex{color:#14532d;font-weight:600}
 .rl{margin-top:10px}
 .rl .t{font-weight:700;margin-bottom:4px}
 .rl table th,.rl table td{font-size:12px}
+.caret{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--af);font-size:18px;flex:none}
+.caret:hover{background:#e4e9f6}.caret:focus-visible{outline:2px solid var(--af)}
+section.card.collapsed>*:not(.hd){display:none}
+section.card.collapsed>.hd{border-bottom:0}
+section.card.collapsed .caret{transform:rotate(-90deg)}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}nav.side{display:none}}
 @media print{header.top .btn,nav.side{display:none}}
@@ -439,7 +444,7 @@ function reviewBox(id){
     <span style="color:var(--mut);font-size:12px">Checking one clears the other.</span></div>
     <textarea placeholder="Notes for this section" data-note>${esc(s.c||"")}</textarea></div>`;
 }
-function head(id,label,extra){return `<div class="hd"><h2>${esc(label)}</h2>${extra||""}</div>`;}
+function head(id,label,extra){return `<div class="hd"><button type="button" class="caret" aria-expanded="true" aria-label="Collapse ${esc(label)}">&#9662;</button><h2>${esc(label)}</h2>${extra||""}</div>`;}
 
 function mockHtml(o){
   const L=o.layout;const f={};o.fields.forEach(r=>f[r[1]]=r);
@@ -568,7 +573,12 @@ document.addEventListener("input",e=>{
   const ta=e.target.closest("[data-note]");if(!ta)return;
   const id=ta.closest(".review").dataset.sec;STATE[id]=STATE[id]||{};STATE[id].c=ta.value;save();
 });
+function setOpen(card,open){card.classList.toggle("collapsed",!open);const c=card.querySelector(".caret");c.setAttribute("aria-expanded",open);}
 document.addEventListener("click",e=>{
+  const car=e.target.closest(".caret");
+  if(car){const card=car.closest("section.card");setOpen(card,card.classList.contains("collapsed"));return;}
+  const nav=e.target.closest("nav.side a");
+  if(nav){const t=document.querySelector(nav.getAttribute("href"));if(t&&t.classList.contains("collapsed"))setOpen(t,true);}
   const pill=e.target.closest(".pills button");
   if(pill){const wrap=pill.parentElement;wrap.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===pill));
     const mock=wrap.closest(".mock");mock.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id===pill.dataset.pane));return;}
