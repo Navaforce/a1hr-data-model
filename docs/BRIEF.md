@@ -15,6 +15,10 @@ A static review page (`index.html`) proposing the data model for the in-scope vi
 - No credentials in this repo or on the page.
 
 ## Workflow
-1. Review page published here (private repo, Pages).
+1. Review page published here (public repo, GitHub Pages: https://navaforce.github.io/a1hr-data-model/). Public by David's choice; no credentials or customer data in it.
 2. Lead SE exports decisions JSON.
 3. Build the data model from the approved export, then hand off to Experience Cloud and Agentforce workstreams.
+
+## Status (23 Nov 2026)
+- Review page complete and live, pending lead SE approval. 11 reviewable sections (Open Decisions takes comments only: Proposed additions, Unit commander).
+- Next after approval: read the exported JSON, check the A1HR org (Contact To Contact Relationship enabled, Contact field conflicts, license types), settle the deploy route (the `sf` CLI login fails for this org), then build. Confirm portal name and URL path with David before creating any Experience Cloud site.
