@@ -123,7 +123,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
 <footer>Review state saves in this browser only. Use Export JSON and send the file back to David.</footer>
 
 <script>
-const DOC_VERSION="v0.1 draft, 23 Nov 2026";
+const DOC_VERSION="v0.2, lead SE feedback applied, 23 Nov 2026";
 document.getElementById("ver").textContent=DOC_VERSION;
 
 /* ---------- DATA ---------- */
@@ -180,7 +180,7 @@ const OBJECTS=[
   ["Next Leave Start","Next_Leave_Start__c","Custom · Roll-Up Summary (MIN)","MIN of Leave Request Start Date where Status = Approved. Past leave moves to Completed so it drops out","21 Dec 2026","V1,V4"],
   ["Pending Leave Requests","Pending_Leave_Count__c","Custom · Roll-Up Summary (COUNT)","COUNT of Leave Request where Status = Pending Approval","1","V1,V4"],
   ["Last Fitness Assessment","Last_Fitness_Assessment_Date__c","Custom · Roll-Up Summary (MAX)","MAX of Fitness Assessment Completion Date where Fitness Assessment Status = Completed","02 Dec 2025","V1,V5"],
-  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MIN)","MIN of Fitness Assessment Requested Assessment Date where Fitness Assessment Status = Scheduled. Blank when none booked","Blank until scheduled","V5"],
+  ["Next Fitness Appointment","Next_Fitness_Appointment__c","Custom · Roll-Up Summary (MIN)","MIN of Fitness Assessment Requested Assessment Date where Fitness Assessment Status is not Completed and not Cancelled. Blank when none open","Blank until scheduled","V5"],
   ["Next Fitness Due Date","Next_Fitness_Due_Date__c","Custom · Formula (Date)","Last Fitness Assessment + 365 days; today if none on file","02 Dec 2026","V1,V5"],
   ["Fitness Status","Fitness_Status__c","Custom · Formula (Text)","Scheduled, Overdue, Due Within 30 Days, Current","Due Within 30 Days","V1,V5"],
   ["Emergency Data Last Reviewed","AFPAAS_Last_Reviewed__c","Custom · Date","AFPAAS emergency data review","15 Jan 2026","V1"],
@@ -188,7 +188,7 @@ const OBJECTS=[
   ["Emergency Data Status","AFPAAS_Status__c","Custom · Formula (Text)","Current, Due Soon, Overdue","Current","V1"],
   ["Photo URL","Photo_URL__c","Custom · URL(255)","Headshot for portal and slides","/resource/amy_airman","V1"]
  ],
- notes:["Next Fitness Appointment is a MIN roll-up of Scheduled assessments.","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all three child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
+ notes:["Next Fitness Appointment is a MIN roll-up of every assessment that is not Completed or Cancelled (lead SE review, 23 Nov).","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all three child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
  layout:{glyph:"✈",title:"Amy Airman",badges:[["Present For Duty","Current duty status from the Contact record."],["Fitness: Due Within 30 Days","Next due date is within 30 days. Turns Scheduled once an appointment is booked."],["Emergency Data: Current","Emergency data was reviewed within the last 12 months."]],
   keys:[["Rank","E-5 Staff Sergeant"],["Next Pay Date","01 Dec 2026"],["Report Date","08 Jan 2027"],["Next Fitness Due","02 Dec 2026"],["Next Leave","21 Dec 2026"],["Leave Balance","42.5 days"]],
   sections:[["Service Member",["FirstName","LastName","Rank__c","AFSC__c","Service_Component__c","DoD_ID__c","AccountId","ReportsToId"]],["Landing Page Values",["Next_Pay_Date__c","Next_Report_Date__c","Next_Fitness_Due_Date__c","Fitness_Status__c","Next_Leave_Start__c","Leave_Balance_Days__c","AFPAAS_Review_Due__c","AFPAAS_Status__c"]],["Family And Benefits",["Marital_Status__c","DEERS_Verified__c","DEERS_Last_Verified__c","Dependent_Count__c"]]],
@@ -196,7 +196,7 @@ const OBJECTS=[
 },
 {
  id:"pcs",label:"PCS Order",api:"PCS_Order__c",kind:"Custom",uc:"V1,V2",
- purpose:"Existing PCS orders for the Airman. Vignette 2 changes orders after marriage, so there must be an order to amend. Drives the report date on the landing page and holds the entitlement values that change when a dependent is added.",
+ purpose:"Existing PCS orders for the Airman. Vignette 2 changes orders after marriage, so there must be an order to amend. Seeded with a spread of real Air Force bases (installation names) so any gaining base reads naturally. Drives the report date on the landing page and holds the entitlement values that change when a dependent is added.",
  rel:"Master-detail to Contact. Amending Case is a lookup to Case.",
  added:true,
  fields:[
@@ -243,7 +243,7 @@ const OBJECTS=[
   ["Traveling With Member","Traveling_With_Member__c","Custom · Checkbox","Agent question","true","V2"],
   ["Planned Travel Date","Planned_Travel_Date__c","Custom · Date","","15 Dec 2026","V2"],
   ["Source Case","Source_Case__c","Custom · Lookup(Case)","Orders Update that created it","Orders Update For Marriage","V2"],
-  ["Verified By","Verified_By__c","Custom · Lookup(User)","Case manager","Case Manager","V2"],
+  ["Verified By","Verified_By__c","Custom · Lookup(User)","Case worker","Marcus Hale","V2"],
   ["Verified On","Verified_On__c","Custom · Date","","Blank","V2"],
   ["Entitlement Impact","Entitlement_Impact__c","Custom · Text(255)","Plain-language effect shown on the case","Adds dependent travel and housing entitlements.","V2"]
  ],
@@ -301,7 +301,7 @@ const OBJECTS=[
   ["Start Date","Start_Date__c","Custom · Date","","21 Dec 2026","V4"],
   ["End Date","End_Date__c","Custom · Date","Validation: on or after Start Date","31 Dec 2026","V4"],
   ["Chargeable Days","Chargeable_Days__c","Custom · Formula (Number)","End - Start + 1 (calendar days)","11","V4"],
-  ["Approver","Approver__c","Custom · Lookup(User)","Defaults to unit commander (case manager in demo)","Case Manager","V4"],
+  ["Approver","Approver__c","Custom · Lookup(User)","Defaults to the case worker in the demo (one-click approval)","Marcus Hale","V4"],
   ["Submitted On","Submitted_On__c","Custom · Date/Time","","23 Nov 2026 10:15","V4"],
   ["Submitted Via","Submitted_Via__c","Custom · Picklist","Portal, Agentforce","Agentforce","V4"],
   ["Decision Date","Decision_Date__c","Custom · Date/Time","Set by approval process","Blank","V4"],
@@ -313,17 +313,17 @@ const OBJECTS=[
   ["Is Upcoming","Is_Upcoming__c","Custom · Formula (Checkbox)","Approved and Start Date after today","false","V1"],
   ["Airman Remarks","Remarks__c","Custom · Long Text(2000)","","Holiday travel to see family.","V4"]
  ],
- notes:["Scheduled flow sets Status to Completed after End Date so the Next Leave roll-up stays correct.","Approval: one-step approval process, approver from the Approver field. Notification back to the Airman on decision."],
+ notes:["Scheduled flow sets Status to Completed after End Date so the Next Leave roll-up stays correct.","Approval: the case worker approves or denies in one click from the record (Approve and Deny buttons). A comment is optional and saves to Decision Comments. Notification back to the Airman on decision. No commander login in the demo (lead SE review, 23 Nov)."],
  layout:{glyph:"☂",title:"Annual Leave: 21 Dec To 31 Dec 2026",badges:[["Pending Approval","Waiting on the commander's decision."],["Annual Leave","Leave type."]],
   path:{values:["Draft","Pending Approval","Approved","Completed"],current:1},
   keys:[["Airman","Amy Airman"],["Start","21 Dec 2026"],["End","31 Dec 2026"],["Chargeable Days","11"],["Remaining Balance","31.5"]],
   sections:[["Request",["Leave_Type__c","Start_Date__c","End_Date__c","Chargeable_Days__c","Leave_Address__c","Leave_Phone__c","Remarks__c"]],["Approval",["Approver__c","Submitted_On__c","Submitted_Via__c","Decision_Date__c","Decision_Comments__c"]],["Balance",["Balance_At_Submission__c","Remaining_Balance__c","Is_Upcoming__c"]]],
-  related:[{title:"Approval History",cols:["Step","Approver","Status","Date"],rows:[["Commander Approval","Case Manager","Pending","23 Nov 2026"]]}]}
+  related:[{title:"Approval History",cols:["Step","Approver","Status","Date"],rows:[["Case Worker Approval","Marcus Hale","Pending","23 Nov 2026"]]}]}
 },
 {
  id:"fitness",label:"Fitness Assessment",api:"Fitness_Assessment__c",kind:"Custom",uc:"V1,V5",
  purpose:"Reuse of the Fitness Assessment object already in Eric's a1agent org (31 fields, read from the org on 23 Nov 2026). One record per assessment, scheduled or completed. Completed records roll up to the Contact so the next due date updates for real. Scheduling creates a record with a Requested Assessment Date, which flips the landing page from due date to appointment date. Fields marked Existing are in the org today; fields marked New are the additions this demo needs.",
- rel:"Master-detail to Contact through the existing Personnel field. Lookup to Base (Account) exists. Related existing objects: Fitness Assessment Appeal and Fitness Improvement Plan.",
+ rel:"Master-detail to Contact through the existing Personnel field. Lookup to Base (Account) exists. The existing Fitness Assessment Appeal and Fitness Improvement Plan objects are not part of this demo.",
  fields:[
   ["Assessment Number","Name","Existing · Auto Number","Existing as an auto number. Demo names are system-generated, which is the one exception to the Title Case naming rule","FA-0000412","V5"],
   ["Personnel","Personnel__c","Existing · Master-Detail(Contact)","Airman. Same master-detail pattern the roll-ups need","Amy Airman","V1,V5"],
@@ -357,7 +357,7 @@ const OBJECTS=[
   ["Proctor","Proctor__c","New · Text(80)","","TSgt Morgan Lee","V5"],
   ["Is Upcoming","Is_Upcoming__c","New · Formula (Checkbox)","Status is Scheduled and Requested Assessment Date is in the future","false","V1,V5"]
  ],
- notes:["Read from the a1agent org: the existing object already uses Personnel as master-detail to Contact, so the roll-ups work with no model change. Existing field API names are kept so this can be moved between orgs.","Existing picklist values were not read. Items marked 'to confirm' will be checked against the org before the build.","Existing, not in this demo's first draft: Fitness Assessment Appeal and Fitness Improvement Plan objects. Not modeled here. Ask the lead SE whether either belongs in the demo.","Next Due Date and the Contact roll-ups read Completion Date and Requested Assessment Date. If policy gives different cycles by rating, change the flow that sets the due date."],
+ notes:["Read from the a1agent org: the existing object already uses Personnel as master-detail to Contact, so the roll-ups work with no model change. Existing field API names are kept so this can be moved between orgs.","Existing picklist values were not read. Items marked 'to confirm' will be checked against the org before the build.","Decided by the lead SE (23 Nov): the Fitness Assessment Appeal and Fitness Improvement Plan objects are not built.","Next Due Date and the Contact roll-ups read Completion Date and Requested Assessment Date. If policy gives different cycles by rating, change the flow that sets the due date."],
  layout:{glyph:"★",title:"FA-0000412",badges:[["Completed","Assessment was performed and scored."],["Excellent","Fitness category derived from the composite score."]],
   path:{values:["Scheduled","Completed"],current:1,done:true},
   keys:[["Personnel","Amy Airman"],["Completed","02 Dec 2025"],["Composite Score","92.5"],["Category","Excellent"],["Next Due","02 Dec 2026"]],
@@ -387,7 +387,7 @@ const OBJECTS=[
   ["Proctor Phone","Proctor_Phone__c","Custom · Phone","","(707) 555-0188","V5"],
   ["Instructions","Instructions__c","Custom · Long Text(2000)","Shown in the confirmation","Arrive 15 minutes early in PT gear.","V5"]
  ],
- notes:["Not in Eric's original list. Proposed so the agent can offer real available dates and the booking decrements capacity.","If slots are unwanted, replace with a simple available-date picker built in the LWC and drop this object."],
+ notes:["Not in Eric's original list. Proposed so the agent can offer real available dates and the booking decrements capacity.","If slots are unwanted, replace with a simple available-date picker built in the LWC and drop this object.","Slots never go stale: seed dates are relative to the day the demo runs (next 8 weeks of duty days) and the demo reset regenerates them, so running it months later still shows open slots."],
  layout:{glyph:"⏰",title:"Travis Fitness Center: 14 Dec 2026 0800",badges:[["Open","Seats are still available."],["Full Assessment","Slot type."]],
   keys:[["Installation","Travis AFB, CA"],["Start","14 Dec 2026 08:00"],["Seats Remaining","5"],["Capacity","12"]],
   sections:[["Slot",["Installation__c","Hosting_Unit__c","Location__c","Slot_Type__c","Start_Date_Time__c","End_Date_Time__c","Day_Of_Week__c"]],["Capacity",["Capacity__c","Seats_Booked__c","Seats_Remaining__c","Slot_Status__c","Is_Available__c"]],["Contact",["Proctor__c","Proctor_Phone__c","Instructions__c"]]],
@@ -395,7 +395,7 @@ const OBJECTS=[
 }
 ];
 
-const DECISIONS=[{id:"dec-additions",t:"Proposed additions",f:"PCS Order and Fitness Test Slot are not on the canvas list.",a:"Approve each with its section"},{id:"dec-commander",t:"Unit commander",f:"Approver is a User lookup so approval routing works. Commander as a Contact stays informational.",a:"Confirm"}];
+const DECISIONS=[];
 const SECTIONS=[
  {id:"scope",label:"Scope And Personas",group:"Overview"},
  {id:"erd",label:"Relationship Diagram",group:"Overview"},
@@ -488,8 +488,8 @@ function scopeSection(){
    <table><thead><tr><th>ID</th><th>Vignette</th><th>Status</th><th>Data model impact</th></tr></thead><tbody>${v.map(r=>`<tr class="${r[2]==="In scope"?"":"excl"}"><td>${r[0]}</td><td>${r[1]}</td><td><span class="badge" style="background:${r[2]==="In scope"?"#1f8f5a":"#6b7280"}">${r[2]}</span></td><td>${r[3]}</td></tr>`).join("")}</tbody></table>
    <h3>Personas</h3><div class="cols">
     <div class="mini"><b>Amy Airman (Golden Airman)</b>Experience Cloud user tied to her Contact. E-5, active duty, 3D1X2.</div>
-    <div class="mini"><b>Case Manager</b>Internal console user. Works Orders Update cases and stands in as leave approver. Name to be set.</div>
-    <div class="mini"><b>Commander (optional)</b>Approver of leave. Modeled as Reports To on the Contact and Approver on the request. No separate persona unless the team adds one.</div></div>
+    <div class="mini"><b>Marcus Hale (Case Worker)</b>Internal console user on the System Administrator profile, so Setup is one click away. Works Orders Update cases and approves leave in one click, with an optional comment.</div>
+    <div class="mini"><b>Commander (left out for now)</b>No commander persona or login. Reports To on the Contact still holds the commander for display. Can be added later as a third persona.</div></div>
    <h3>Modeling decisions taken from the 23 Nov meeting</h3><ul>
     <li>Airman is the standard Contact linked to an Experience Cloud user. Permissions hang on the user, the UI reads the Contact.</li>
     <li>Leave Request and Fitness Assessment are custom objects, not cases.</li>
@@ -536,7 +536,7 @@ function erdSection(){
 }
 
 function accessSection(){
-  const rows=[["Airman portal user","Experience Cloud user linked to the Airman Contact","Reads own Contact, Cases, Leave, Fitness, PCS and dependent relationships. Creates Leave and Cases. Cannot see other Airmen."],["Case manager","Internal Salesforce user, console app","Cases, Contacts, all four child objects. Approver for Leave and Orders Update."],["Agents (Tarek)","Service agent (portal) and employee agent (console)","Run as the agent user; actions read Contact, Fitness, Leave, PCS and create Case, Leave, dependent Contact and relationship, Fitness Assessment."]];
+  const rows=[["Airman portal user","Experience Cloud user linked to the Airman Contact","Reads own Contact, Cases, Leave, Fitness, PCS and dependent relationships. Creates Leave and Cases. Cannot see other Airmen."],["Marcus Hale (case worker)","Internal Salesforce user on the System Administrator profile, console app","Cases, Contacts, all four child objects, and Setup. Approves Leave in one click (optional comment) and works Orders Update cases."],["Agents (Tarek)","Service agent (portal) and employee agent (console)","Run as the agent user; actions read Contact, Fitness, Leave, PCS and create Case, Leave, dependent Contact and relationship, Fitness Assessment."]];
   return `<section class="card" id="access">${head("access","Identity And Access")}<div class="body">
    <p>Permissions are assigned in the same deploy as each object. Nothing is built until this section is approved.</p>
    ${sortTable(["Who","Account type","Access"],rows)}
@@ -547,7 +547,7 @@ function accessSection(){
 
 function decisionsSection(){
   const d=DECISIONS.map(x=>`<div class="dec"><h3>${esc(x.t)}</h3><p>${esc(x.f)}</p><p class="ask"><b>Ask:</b> ${esc(x.a)}</p><div class="review" data-sec="${x.id}"><textarea placeholder="Comment on this decision" data-note>${esc((STATE[x.id]||{}).c||"")}</textarea></div></div>`).join("");
-  return `<section class="card" id="decisions">${head("decisions","Open Decisions")}<div class="body">${d}</div></section>`;
+  return `<section class="card" id="decisions">${head("decisions","Open Decisions")}<div class="body">${d||"<p>No open decisions. The lead SE review of 23 Nov closed the previous two: PCS Order and Fitness Test Slot are accepted, and the commander persona is left out for now.</p>"}</div></section>`;
 }
 
 
