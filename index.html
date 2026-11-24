@@ -576,11 +576,13 @@ function build(){
   document.getElementById("side").innerHTML=h;
   progress();
 }
+let TAB="model";
 function progress(){
-  const RS=SECTIONS.filter(s=>!s.nr);const done=RS.filter(s=>STATE[s.id]&&STATE[s.id].d).length;
+  const ALL=SECTIONS.concat(typeof SECTIONS1!=="undefined"?SECTIONS1:[]);
+  const RS=(TAB==="t1"?SECTIONS1:SECTIONS).filter(s=>!s.nr);const done=RS.filter(s=>STATE[s.id]&&STATE[s.id].d).length;
   document.getElementById("progtxt").textContent=`${done} of ${RS.length} reviewed`;
   document.getElementById("progbar").style.width=(100*done/RS.length)+"%";
-  SECTIONS.forEach(s=>{const d=document.querySelector(`[data-dot="${s.id}"]`);if(d)d.className="dot "+((STATE[s.id]||{}).d||"");});
+  ALL.forEach(s=>{const d=document.querySelector(`[data-dot="${s.id}"]`);if(d)d.className="dot "+((STATE[s.id]||{}).d||"");});
 }
 
 /* ---------- EVENTS ---------- */
@@ -622,16 +624,16 @@ document.addEventListener("click",e=>{
 });
 
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
-function payload(){return {doc:"a1hr-data-model-review",version:DOC_VERSION,exportedAt:new Date().toISOString(),sections:SECTIONS.filter(s=>!s.nr).map(s=>({id:s.id,label:s.label,decision:(STATE[s.id]||{}).d||"none",comment:(STATE[s.id]||{}).c||""})),decisions:DECISIONS.map(x=>({id:x.id,topic:x.t,comment:(STATE[x.id]||{}).c||""}))};}
+function payload(){return {doc:"a1hr-data-model-review",version:DOC_VERSION,exportedAt:new Date().toISOString(),sections:SECTIONS.filter(s=>!s.nr).map(s=>({id:s.id,label:s.label,decision:(STATE[s.id]||{}).d||"none",comment:(STATE[s.id]||{}).c||""})),decisions:DECISIONS.map(x=>({id:x.id,topic:x.t,comment:(STATE[x.id]||{}).c||""})),task1:{sections:SECTIONS1.filter(s=>!s.nr).map(s=>({id:s.id,label:s.label,decision:(STATE[s.id]||{}).d||"none",comment:(STATE[s.id]||{}).c||""})),decisions:T1_DEC.map(x=>({id:x.id,topic:x.t,comment:(STATE[x.id]||{}).c||""}))}};}
 document.getElementById("expJson").onclick=()=>download("a1hr-data-model-review.json",JSON.stringify(payload(),null,2),"application/json");
 document.getElementById("impBtn").onclick=()=>document.getElementById("impFile").click();
 document.getElementById("impFile").onchange=e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const p=JSON.parse(r.result);if(p.doc!=="a1hr-data-model-review")throw 0;
-    STATE={};p.sections.forEach(s=>{STATE[s.id]={d:s.decision==="none"?"":s.decision,c:s.comment||""};});(p.decisions||[]).forEach(x=>{STATE[x.id]={c:x.comment||""};});save();build();}
+    STATE={};p.sections.forEach(s=>{STATE[s.id]={d:s.decision==="none"?"":s.decision,c:s.comment||""};});(p.decisions||[]).forEach(x=>{STATE[x.id]={c:x.comment||""};});if(p.task1){p.task1.sections.forEach(s=>{STATE[s.id]={d:s.decision==="none"?"":s.decision,c:s.comment||""};});(p.task1.decisions||[]).forEach(x=>{STATE[x.id]={c:x.comment||""};});}save();build();buildPlan();progress();}
     catch(_){alert("That file is not a review export from this page.");}};
   r.readAsText(f);e.target.value="";};
-document.getElementById("clearBtn").onclick=()=>{if(confirm("Clear all approvals and comments in this browser?")){STATE={};save();build();}};
+document.getElementById("clearBtn").onclick=()=>{if(confirm("Clear all approvals and comments in this browser?")){STATE={};save();build();buildPlan();progress();}};
 
 /* ---------- TASK 1 PLAN ---------- */
 const T1_INV=[
@@ -716,11 +718,12 @@ function buildPlan(){
 function showTab(t){
   document.getElementById("view-model").hidden=t!=="model";document.getElementById("view-t1").hidden=t!=="t1";
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  TAB=t;progress();
   history.replaceState(null,"",t==="t1"?"#task1":location.pathname);window.scrollTo(0,0);
 }
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab);});
 
-build();buildPlan();if(location.hash==='#task1')showTab('t1');
+build();buildPlan();if(location.hash==='#task1')showTab('t1');else progress();
 </script>
 </body>
 </html>
