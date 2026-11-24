@@ -103,6 +103,12 @@ section.card.collapsed>*:not(.hd){display:none}
 section.card.collapsed>.hd{border-bottom:0}
 section.card.collapsed .caret{transform:rotate(-90deg)}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
+.tabs{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;display:flex;gap:6px;position:sticky;top:58px;z-index:15}
+.tabs button{all:unset;cursor:pointer;padding:11px 16px;font-size:13px;font-weight:700;color:var(--mut);border-bottom:3px solid transparent}
+.tabs button[aria-selected=true]{color:var(--af);border-bottom-color:var(--af)}
+.tabs button:focus-visible{outline:2px solid var(--af)}
+.tabs button:hover{color:var(--af)}
+.sect-note{color:var(--mut);font-size:12px}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}nav.side{display:none}}
 @media print{header.top .btn,nav.side{display:none}}
 </style>
@@ -116,9 +122,17 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
   <input type="file" id="impFile" accept="application/json" hidden>
   <button class="btn ghost" id="clearBtn">Clear</button>
 </header>
-<div class="wrap">
+<div class="tabs" role="tablist" aria-label="Review sections">
+  <button type="button" role="tab" id="tab-model" data-tab="model" aria-selected="true">Data Model</button>
+  <button type="button" role="tab" id="tab-t1" data-tab="t1" aria-selected="false">Task 1: Home Page Wiring</button>
+</div>
+<div class="wrap" id="view-model">
   <nav class="side" id="side"></nav>
   <main id="main"></main>
+</div>
+<div class="wrap" id="view-t1" hidden>
+  <nav class="side" id="side2"></nav>
+  <main id="plan1"></main>
 </div>
 <footer>Review state saves in this browser only. Use Export JSON and send the file back to David.</footer>
 
@@ -618,7 +632,94 @@ document.getElementById("impFile").onchange=e=>{
   r.readAsText(f);e.target.value="";};
 document.getElementById("clearBtn").onclick=()=>{if(confirm("Clear all approvals and comments in this browser?")){STATE={};save();build();}};
 
-build();
+/* ---------- TASK 1 PLAN ---------- */
+const T1_INV=[
+["Hero","Request leave (button)","Dead button","Opens the Request Leave form. Creates a Leave Request (Status Submitted, Submitted Via Portal, balance at submission stamped, chargeable days computed). Dial, Needs you and Next leave refresh without a reload.","Leave_Request__c","New form + save","1"],
+["Hero","Open a case (button)","Dead button","Opens the Open A Case form: pick General Service Request or Orders Update, subject, description. Creates the Case on Jordan's Contact and it appears in Needs you and Cases.","Case","New form + save","1"],
+["Hero","Update my info (button)","Dead button","Opens the Update My Info form: phone, personal email, mailing address, emergency contact. Saves to the Contact and stamps Emergency Data Last Reviewed.","Contact","New form + save","1"],
+["Snapshot","Emergency data: Review it now (link)","Dead link","Opens Update My Info on the emergency contact section. Saving moves the cell to today's date and Up to date.","Contact","Reuses Update My Info","1"],
+["Snapshot","Next pay: Statement on myPay (link, external)","Dead link","Opens the external myPay site in a new tab.","App link record","Link","5"],
+["Needs you","Row button on each item (View case / Open item)","Dead button","Case row opens the Case detail page. Action Item row opens a small panel with the instructions, due date, related case link and a Mark Complete button that sets Status Complete and removes it from the list.","Case, Action_Item__c","Detail page + panel + save","3"],
+["Needs you","Everything assigned to you (link)","Dead link","Opens the Cases page filtered to My Work: open cases and open action items.","Case, Action_Item__c","Link to page shell","3"],
+["Leave","Leave history (link)","Dead link","Opens the Leave page: every Leave Request for Jordan, sortable, 20 per page, status badges.","Leave_Request__c","Link to page shell","3"],
+["Leave","Request leave (button)","Dead button","Same Request Leave form as the hero button.","Leave_Request__c","Reuses form","1"],
+["Leave","You earn / Carry-over limit (static text)","Hardcoded","Read from Contact fields (monthly accrual, carry-over limit, carry-over date) so changing the Contact changes the page.","Contact","Controller change","3"],
+["Who's out","Open the calendar (link)","Dead link","Opens the team calendar page: approved leave for the unit, week and month view.","Leave_Request__c","Link to page shell","4"],
+["Who's out","Week grid (sample data)","Sample data","Built from approved Leave Requests of Contacts who report to Jordan, for the coming duty week, with holidays. TDY comes from a TDY leave type or a TDY record (see decision 5).","Leave_Request__c, Contact","Controller change","4"],
+["Announcements","Each title (link)","Dead link","Opens the announcement detail page.","Announcement source (decision 2)","Detail page","5"],
+["Announcements","See all (link)","Dead link","Opens the Announcements list page, newest first, paginated.","Announcement source","Link to page shell","5"],
+["Announcements","List (sample data)","Sample data","Read from the announcement source, newest three.","Announcement source","Controller change","5"],
+["My team","Open the workbench (link)","Dead link","Opens the My Team page: Airmen who report to Jordan with their status.","Contact","Link to page shell","4"],
+["My team","Each teammate tile (sample data)","Sample data","Contacts where Reports To is Jordan. Status text is computed from today's approved leave. Tile opens that Airman's record view.","Contact, Leave_Request__c","Controller change","4"],
+["My team","Nothing waiting on you (static line)","Hardcoded","True or false from data: shows open items for the team when there are any, otherwise the all-clear line.","Case, Action_Item__c","Controller change","4"],
+["Celebrations","Send a note (link)","Dead link","Opens a short note form addressed to the person. Saves a Celebration Note and shows a confirmation. Showing it to the recipient is decision 3.","Celebration_Note__c (new, decision 3)","New form + save","5"],
+["Celebrations","See all (link)","Dead link","Opens the Celebrations page: birthdays and service anniversaries for the unit, next 60 days.","Contact","Link to page shell","5"],
+["Celebrations","List (sample data)","Sample data","Built from Contact birthdays and service anniversaries for the team, next occurrence first. Fields to confirm in the org.","Contact","Controller change","5"],
+["Apps and links","Each app chip (10)","Dead links","Internal apps open their page in the portal. External apps (myPay, LeaveWeb) open in a new tab. All chips read from one admin-editable list.","MyFSS_App__mdt (new)","Custom metadata + links","5"],
+["Apps and links","All 24 apps (link)","Dead link","Opens the Apps page with all 24 from the same list, searchable.","MyFSS_App__mdt","Link to page shell","5"],
+["App bar","Home, My record, My team, Services, Cases, Apps (nav)","Dead links","Each goes to its page. Pages not built yet get a branded shell with the page title so no link is dead. Content is Task 2.","Site pages","Page shells","2"],
+["App bar","Phone tab bar: Record, Cases, More","Placeholders","Record and Cases route to their shells. More opens a menu: My team, Services, Apps, Sign out. Ask is left for the Ask task.","Site pages","Link + menu","2"],
+["App bar","Profile avatar","No action","Opens a menu: Update my info, My record, Sign out.","User, Contact","Menu","2"],
+["Footer","Eight policy links","Unverified","Check each URL resolves, keep external, open in a new tab.","None","Verify only","2"]
+];
+const T1_BUILD=[
+["Request Leave form","Screen flow with one dark-panel screen: type, dates, address, phone, remarks, live chargeable days and balance check. Blocks overdraw. Creates the Leave Request.","Leave_Request__c"],
+["Open A Case form","Screen flow: record type cards, subject, description. Creates the Case.","Case"],
+["Update My Info form","Screen flow: contact and emergency sections, validation inline. Updates the Contact.","Contact"],
+["Action Item panel","Panel LWC in the home page with Mark Complete (Apex, because the portal license cannot update Task).","Action_Item__c"],
+["Send a Note form","Short modal, saves a Celebration Note.","Celebration_Note__c"],
+["Page shells","Named site pages for My record, My team, Services, Cases, Leave, Calendar, Announcements, Celebrations, Apps and detail pages. Title, breadcrumb back to Home, nothing else. Task 2 fills them.","Site pages"],
+["Home controllers","Extend MyfssHomeController and MyfssNeedsController: team, who's out, celebrations, announcements, accrual facts. All non-cacheable, same pattern as today.","Apex"],
+["App list","Custom metadata type MyFSS_App__mdt (label, URL or page, external flag, sort order, shown on home). 24 records.","Custom metadata"],
+["Access","Airman portal permission set gets create on Leave Request and Case, edit on the Contact fields, read on the new records, plus Apex class access. Same deploy as each piece.","Permission set"]
+];
+const T1_DEC=[
+{id:"t1d1",t:"How the forms open",f:"Screen flows fit the dark-panel standard, but an LWR site may not run a flow component inside a custom component.",a:"Spike first (half a day). If a flow can open in a modal on the home page, use flows. If not, build each form as a modal LWC that saves through Apex, with the same look. Recommended: spike, then decide.",r:"Spike, then flows if they work"},
+{id:"t1d2",t:"Where announcements come from",f:"The site already has a News Detail page from the build. Announcements need a source that an admin can edit.",a:"Use the site CMS News content (already wired to News Detail), or a small custom Announcement object. Recommended: CMS News, no new object.",r:"CMS News"},
+{id:"t1d3",t:"What Send a note does",f:"There is no internal email or chat in the demo.",a:"Save a Celebration Note record and confirm on screen, and show it on the recipient's portal. Or only confirm on screen with nothing saved. Recommended: save the record so it can be shown in the demo.",r:"Save record"},
+{id:"t1d4",t:"External app URLs",f:"myPay and LeaveWeb are real Air Force and DoD sites. The demo should not take anyone to a login page by surprise.",a:"Open the real public site home page in a new tab, or a branded demo stand-in page. Recommended: real public pages, flagged in the talk track.",r:"Real public pages"},
+{id:"t1d5",t:"Who is the team and what is TDY",f:"Team uses Contact Reports To. The sample grid shows TDY, which Leave Request does not cover.",a:"Add a TDY value to Leave Type so TDY shows on the same grid, or leave TDY out. Recommended: add the Leave Type value, no new object.",r:"Add Leave Type value"}
+];
+function t1Plan(){
+  const rows=T1_INV.map(r=>[r[0],r[1],{s:r[2],h:`<span class="badge" style="background:${r[2].startsWith("Sample")||r[2]==="Hardcoded"?"#b7791f":r[2]==="Unverified"?"#6b7280":"#c0392b"}">${esc(r[2])}</span>`},r[3],r[4],r[5],{s:+r[6],h:"Inc "+r[6]}]);
+  const bld=T1_BUILD.map(r=>[r[0],r[1],r[2]]);
+  const dec=T1_DEC.map(x=>`<div class="dec"><h3>${esc(x.t)}</h3><p>${esc(x.f)}</p><p class="ask"><b>Ask:</b> ${esc(x.a)}</p><p><b>Recommended:</b> ${esc(x.r)}</p><div class="review" data-sec="${x.id}"><textarea placeholder="Comment on this decision" data-note>${esc((STATE[x.id]||{}).c||"")}</textarea></div></div>`).join("");
+  const incs=[["1","Hero forms","Request Leave, Open A Case, Update My Info, Emergency review link, plus access. Dial, Needs you and snapshot refresh after save.","Submit a leave request as Jordan, see it in Needs you, approve it as Marcus, see the dial move. Open a case. Edit the emergency contact."],["2","Navigation and shells","App bar, phone tabs, avatar menu, footer links, page shells.","Click every nav item on desktop and phone width: no dead link, back to Home works."],["3","Needs you and Leave","Item buttons, Action Item panel, Everything assigned, Leave history, accrual facts from the Contact.","Complete an action item and watch it leave the list. Leave history opens and sorts."],["4","Who's out and My team","Real data for both, calendar and team links.","Approve leave for a teammate as Marcus and see the grid change."],["5","Announcements, Celebrations, Apps","Source, Send a note, app list, all links.","Every chip lands on the right place. Send a note and see the confirmation."],["6","Full click-through","Every row of the inventory above, as Jordan and as Marcus, desktop and phone width, screenshots.","Pass or fail per row, handed back as a click-path sheet."]];
+  return `<section class="card" id="t1goal">${head("t1goal","Goal And Scope")}<div class="body">
+   <p><b>Goal:</b> every button and link on the myFSS home page does something real: opens a form that writes a record, opens a record or page, or reads live data. No dead link, no sample data left on the home page.</p>
+   <div class="cols">
+    <div class="mini"><b>In scope</b>All ${T1_INV.length} items in the inventory: hero, snapshot, Needs you, Leave, Who's out, Announcements, My team, Celebrations, Apps and links, app bar, phone tabs, footer.</div>
+    <div class="mini"><b>Not in this task</b>Ask box, its chips, Send, Ask about these, Ask about leave and Chat with a live agent. They stay as they are until the Ask task. Content of the other pages (Task 2). Mock CAC login.</div>
+    <div class="mini"><b>Principle</b>Where a destination page does not exist yet, it gets a titled shell in this task so nothing is a dead end, and Task 2 fills it. Forms follow the dark-panel standard.</div></div>
+  </div>${reviewBox("t1goal")}</section>
+  <section class="card" id="t1inv">${head("t1inv","Element Inventory",`<span class="sect-note">${T1_INV.length} items, from the current page</span>`)}<div class="body">
+   <p>Today shows what the element does now. The last column is the increment that builds it.</p>
+   ${sortTable(["Area","Element","Today","Becomes","Data","Build","Inc"],rows,{pageSize:20})}
+  </div>${reviewBox("t1inv")}</section>
+  <section class="card" id="t1build">${head("t1build","What Gets Built")}<div class="body">
+   ${sortTable(["Piece","What it is","Touches"],bld)}
+   <div class="note add">Every deploy is a changed-components-only deploy, preceded by the drift check on the site bundle and any page, so manual edits in the org are never overwritten.</div>
+  </div>${reviewBox("t1build")}</section>
+  <section class="card" id="t1inc">${head("t1inc","Build Order And Checks")}<div class="body">
+   <p>One increment at a time: build, deploy, verify in the browser as Jordan, hand to David to test, fix, then the next.</p>
+   ${sortTable(["Inc","Name","Contents","Check"],incs.map(r=>[{s:+r[0],h:r[0]},r[1],r[2],r[3]]))}
+  </div>${reviewBox("t1inc")}</section>
+  <section class="card" id="t1dec">${head("t1dec","Decisions Needed")}<div class="body">${dec}</div></section>`;
+}
+const SECTIONS1=[{id:"t1goal",label:"Goal And Scope",group:"Task 1"},{id:"t1inv",label:"Element Inventory",group:"Task 1"},{id:"t1build",label:"What Gets Built",group:"Task 1"},{id:"t1inc",label:"Build Order And Checks",group:"Task 1"},{id:"t1dec",label:"Decisions Needed",group:"Task 1",nr:1}];
+function buildPlan(){
+  document.getElementById("plan1").innerHTML=t1Plan();
+  document.querySelectorAll("#plan1 .tw").forEach(applyPager);
+  document.getElementById("side2").innerHTML="<h4>Task 1: Home Page Wiring</h4>"+SECTIONS1.map(s=>`<a href="#${s.id}"><i class="dot" data-dot="${s.id}"></i>${esc(s.label)}</a>`).join("");
+}
+function showTab(t){
+  document.getElementById("view-model").hidden=t!=="model";document.getElementById("view-t1").hidden=t!=="t1";
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  history.replaceState(null,"",t==="t1"?"#task1":location.pathname);window.scrollTo(0,0);
+}
+document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab);});
+
+build();buildPlan();if(location.hash==='#task1')showTab('t1');
 </script>
 </body>
 </html>
