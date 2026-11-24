@@ -145,14 +145,14 @@ const OBJECTS=[
  layout:{glyph:"⌂",title:"60th Mission Support Group",badges:[["Air Force Unit","Account type used by the portal and sharing."]],
   keys:[["Installation","Travis AFB, CA"],["Major Command","Air Mobility Command"],["Wing","60th Air Mobility Wing"],["Unit Commander","Maj Riley Carter"]],
   sections:[["Unit",["Name","Type","Installation__c","MAJCOM__c","Wing__c","Unit_Commander__c"]]],
-  related:[{title:"Airmen (Contacts)",cols:["Name","Rank","AFSC","Duty Status"],rows:[["Amy Airman","E-5 Staff Sergeant","3D1X2","Present For Duty"],["Jordan Reyes","E-4 Senior Airman","2A5X1","On Leave"],["Casey Bell","E-6 Technical Sergeant","3D1X2","Present For Duty"]]}]}
+  related:[{title:"Airmen (Contacts)",cols:["Name","Rank","AFSC","Duty Status"],rows:[["Jordan Rivera","E-5 Staff Sergeant","3D1X2","Present For Duty"],["Daniel Kim","E-4 Senior Airman","2A5X1","On Leave"],["Casey Bell","E-6 Technical Sergeant","3D1X2","Present For Duty"]]}]}
 },
 {
  id:"contact",label:"Contact (Airman)",api:"Contact",kind:"Standard",uc:"V1,V2,V4,V5",
  purpose:"The Airman. One Contact per service member, tied to an Experience Cloud user. Carries the landing-page header values (next pay date, report date, fitness status, leave, emergency data review) so the portal and agent read one record. Fitness, leave and orders values roll up from child objects, so adding a record updates the page.",
  rel:"Master of Fitness Assessment (existing Personnel field), Leave Request and PCS Order (master-detail, enables roll-ups). Linked to dependents through Contact To Contact Relationship. Two record types: Airman, Dependent. Looks up to Account (unit) and Reports To (commander).",
  fields:[
-  ["First Name","FirstName","Standard · Text(40)","","Amy","V1"],
+  ["First Name","FirstName","Standard · Text(40)","","Jordan","V1"],
   ["Last Name","LastName","Standard · Text(80)","Required","Airman","V1"],
   ["Account (Unit)","AccountId","Standard · Lookup(Account)","","60th Mission Support Group","V1"],
   ["Reports To (Commander)","ReportsToId","Standard · Lookup(Contact)","Default leave approver","Maj Riley Carter","V4"],
@@ -189,7 +189,7 @@ const OBJECTS=[
   ["Photo URL","Photo_URL__c","Custom · URL(255)","Headshot for portal and slides","/resource/amy_airman","V1"]
  ],
  notes:["Next Fitness Appointment is a MIN roll-up of every assessment that is not Completed or Cancelled (lead SE review, 23 Nov).","Next Pay Date is a formula, so the demo never needs a reset for it.","Roll-ups need master-detail. That makes the Contact owner the sharing source for all three child objects.","The landing page shows the appointment date when Next Fitness Appointment is populated, otherwise the due date. That is portal logic, not a field."],
- layout:{glyph:"✈",title:"Amy Airman",badges:[["Present For Duty","Current duty status from the Contact record."],["Fitness: Due Within 30 Days","Next due date is within 30 days. Turns Scheduled once an appointment is booked."],["Emergency Data: Current","Emergency data was reviewed within the last 12 months."]],
+ layout:{glyph:"✈",title:"Jordan Rivera",badges:[["Present For Duty","Current duty status from the Contact record."],["Fitness: Due Within 30 Days","Next due date is within 30 days. Turns Scheduled once an appointment is booked."],["Emergency Data: Current","Emergency data was reviewed within the last 12 months."]],
   keys:[["Rank","E-5 Staff Sergeant"],["Next Pay Date","01 Dec 2026"],["Report Date","08 Jan 2027"],["Next Fitness Due","02 Dec 2026"],["Next Leave","21 Dec 2026"],["Leave Balance","42.5 days"]],
   sections:[["Service Member",["FirstName","LastName","Rank__c","AFSC__c","Service_Component__c","DoD_ID__c","AccountId","ReportsToId"]],["Landing Page Values",["Next_Pay_Date__c","Next_Report_Date__c","Next_Fitness_Due_Date__c","Fitness_Status__c","Next_Leave_Start__c","Leave_Balance_Days__c","AFPAAS_Review_Due__c","AFPAAS_Status__c"]],["Family And Benefits",["Marital_Status__c","DEERS_Verified__c","DEERS_Last_Verified__c","Dependent_Count__c"]]],
   related:[{title:"Cases",cols:["Subject","Category","Status","Opened"],rows:[["Where Is My Amended Orders Package","Orders Update","In Review","23 Nov 2026"],["Missing Housing Allowance On Last Pay","MilPay","Closed","04 Oct 2026"],["SGLI Beneficiary Change","Benefits (SGLI)","Closed","12 Aug 2026"]]},{title:"Leave Requests",cols:["Leave Type","Start","End","Status"],rows:[["Annual Leave","21 Dec 2026","31 Dec 2026","Approved"],["Annual Leave","04 Jul 2026","10 Jul 2026","Completed"]]}]}
@@ -201,7 +201,7 @@ const OBJECTS=[
  added:true,
  fields:[
   ["Orders Title","Name","Standard · Text(80)","Set by flow, Title Case, no IDs","PCS To Joint Base Langley-Eustis","V2"],
-  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Amy Airman","V1,V2"],
+  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Jordan Rivera","V1,V2"],
   ["Order Number","Order_Number__c","Custom · Text(20)","Fictional reference","PCS-26-04217","V2"],
   ["Order Type","Order_Type__c","Custom · Picklist","CONUS PCS, OCONUS PCS","CONUS PCS","V2"],
   ["Status","Status__c","Custom · Picklist","Active, Amendment Pending, Amended, Completed, Cancelled","Active","V1,V2"],
@@ -233,9 +233,9 @@ const OBJECTS=[
  rel:"Two Contact lookups (the Airman and the dependent) plus a Relationship Type. Lookup to Case for the source case. A Roll-Up Summary is not possible on a lookup, so Dependent Count on the Airman is kept by the same flow that creates the relationship.",
  fields:[
   ["Relationship Name","Name","Standard · Auto Number","System generated","CCR-0000031","V2"],
-  ["Airman","ContactId","Standard · Lookup(Contact)","Airman side of the link. Verify the field name in the org","Amy Airman","V2"],
-  ["Dependent","RelatedContactId","Standard · Lookup(Contact)","The spouse or child Contact","Jordan Airman","V2"],
-  ["Relationship Type","RelationshipTypeId","Standard · Lookup(Relationship Type)","Spouse, Child, Stepchild, Other","Spouse","V2"],
+  ["Airman","ContactId","Standard · Lookup(Contact)","Airman side of the link. Verify the field name in the org","Jordan Rivera","V2"],
+  ["Dependent","RelatedContactId","Standard · Lookup(Contact)","The spouse or child Contact","Taylor Rivera","V2"],
+  ["Relationship Type","PartyRoleRelationId","Standard · Lookup(Party Role Relation)","Spouse, Child, Stepchild, Other","Spouse","V2"],
   ["Start Date","StartDate","Standard · Date","Marriage date for a spouse, birth date for a child","20 Oct 2026","V2"],
   ["End Date","EndDate","Standard · Date","Divorce or age-out","Blank","V2"],
   ["Is Active","IsActive","Standard · Checkbox","","true","V2"],
@@ -248,9 +248,9 @@ const OBJECTS=[
   ["Entitlement Impact","Entitlement_Impact__c","Custom · Text(255)","Plain-language effect shown on the case","Adds dependent travel and housing entitlements.","V2"]
  ],
  notes:["Decision from David: use the Contact to Contact relationship, not a Dependent custom object. It needs verification in the org that Contact To Contact Relationship is enabled for this Public Sector IDO and accepts custom fields. If not, the fallback is the Dependent custom object from draft v0.1.","The dependent Contact gets a Dependent record type and these extra Contact fields: DEERS Registered, DEERS Registration Date, ID Card Issued, TRICARE Enrolled, Date Of Birth (standard Birthdate). They are listed on the Contact section.","Dependent Count on the Airman is a number maintained by the flow, because roll-ups require master-detail."],
- layout:{glyph:"♡",title:"Amy Airman and Jordan Airman",badges:[["Pending Verification","Case manager has not yet verified this dependent against DEERS."],["Spouse","Relationship type."]],
-  keys:[["Airman","Amy Airman"],["Dependent","Jordan Airman"],["Traveling With Member","Yes"],["Planned Travel","15 Dec 2026"]],
-  sections:[["Relationship",["ContactId","RelatedContactId","RelationshipTypeId","StartDate","EndDate","IsActive"]],["Verification",["Dependent_Status__c","Verified_By__c","Verified_On__c","Source_Case__c"]],["Travel",["Traveling_With_Member__c","Planned_Travel_Date__c","Entitlement_Impact__c"]]],
+ layout:{glyph:"♡",title:"Jordan Rivera and Taylor Rivera",badges:[["Pending Verification","Case manager has not yet verified this dependent against DEERS."],["Spouse","Relationship type."]],
+  keys:[["Airman","Jordan Rivera"],["Dependent","Taylor Rivera"],["Traveling With Member","Yes"],["Planned Travel","15 Dec 2026"]],
+  sections:[["Relationship",["ContactId","RelatedContactId","PartyRoleRelationId","StartDate","EndDate","IsActive"]],["Verification",["Dependent_Status__c","Verified_By__c","Verified_On__c","Source_Case__c"]],["Travel",["Traveling_With_Member__c","Planned_Travel_Date__c","Entitlement_Impact__c"]]],
   related:[{title:"Cases",cols:["Subject","Status","Opened"],rows:[["Orders Update For Marriage","In Review","23 Nov 2026"]]}]}
 },
 {
@@ -260,7 +260,7 @@ const OBJECTS=[
  fields:[
   ["Case Number","CaseNumber","Standard · Auto Number","System","00003106","V1"],
   ["Record Type","RecordTypeId","Standard · Record Type","Orders Update, General Service Request","Orders Update","V1,V2"],
-  ["Contact","ContactId","Standard · Lookup(Contact)","The Airman","Amy Airman","V1,V2"],
+  ["Contact","ContactId","Standard · Lookup(Contact)","The Airman","Jordan Rivera","V1,V2"],
   ["Subject","Subject","Standard · Text(255)","Set by agent","Orders Update For Marriage","V1,V2"],
   ["Description","Description","Standard · Long Text","Agent summary of the interview","Airman married on 20 Oct 2026. Adding spouse as dependent for travel and entitlements.","V2"],
   ["Status","Status","Standard · Picklist","New, In Review, Pending Airman Information, Approved, Closed","In Review","V1,V2"],
@@ -279,15 +279,15 @@ const OBJECTS=[
   ["DEERS Match Verified","DEERS_Match_Verified__c","Custom · Checkbox","Case manager confirms case data matches DEERS","false","V2"],
   ["Approval Decision Date","Approval_Decision_Date__c","Custom · Date","","Blank","V2"],
   ["Amended Orders Reference","Amended_Orders_Reference__c","Custom · Text(40)","Mocked on approval","PCS-26-04217-A1","V2"],
-  ["Agent Conversation Summary","Agent_Conversation_Summary__c","Custom · Long Text(32000)","AI-written summary shown to the case manager","Airman confirmed DEERS update is complete. Spouse Jordan Airman travels with member.","V2"],
+  ["Agent Conversation Summary","Agent_Conversation_Summary__c","Custom · Long Text(32000)","AI-written summary shown to the case manager","Airman confirmed DEERS update is complete. Spouse Taylor Rivera travels with member.","V2"],
   ["Resolution Summary","Resolution_Summary__c","Custom · Long Text(32000)","Shown on closed cases in the portal","Orders amended; dependent entitlements updated.","V1"]
  ],
  notes:["Retraining record type from the canvas is dropped with Vignette 3.","Orders approval uses the Orders Review Status field plus an approval process, same one-step pattern as Leave.","Seed 6-8 closed General Service Request cases so the portal case history looks real."],
  layout:{glyph:"☰",title:"Orders Update For Marriage",badges:[["In Review","Case manager is reviewing the request."],["Orders Update","Record type."],["Medium","Priority."]],
   path:{values:["New","In Review","Approved","Closed"],current:1},
-  keys:[["Case Number","00003106"],["Airman","Amy Airman"],["Qualifying Event","Marriage"],["Event Date","20 Oct 2026"],["Review Status","Pending Approval"]],
+  keys:[["Case Number","00003106"],["Airman","Jordan Rivera"],["Qualifying Event","Marriage"],["Event Date","20 Oct 2026"],["Review Status","Pending Approval"]],
   sections:[["Request",["Subject","Service_Category__c","Qualifying_Event__c","Qualifying_Event_Date__c","Related_PCS_Order__c","Origin"]],["Interview Answers",["DEERS_Update_Confirmed__c","Spouse_Traveling_With_Member__c","Planned_Travel_Start__c","Planned_Travel_End__c","Additional_Dependents_Count__c"]],["Review And Approval",["Orders_Review_Status__c","DEERS_Match_Verified__c","Approval_Decision_Date__c","Amended_Orders_Reference__c"]],["Summary",["Agent_Conversation_Summary__c"]]],
-  related:[{title:"Dependent Relationships",cols:["Dependent","Relationship","Traveling","Status"],rows:[["Jordan Airman","Spouse","Yes","Pending Verification"]]}]}
+  related:[{title:"Dependent Relationships",cols:["Dependent","Relationship","Traveling","Status"],rows:[["Taylor Rivera","Spouse","Yes","Pending Verification"]]}]}
 },
 {
  id:"leave",label:"Leave Request",api:"Leave_Request__c",kind:"Custom",uc:"V1,V4",
@@ -295,7 +295,7 @@ const OBJECTS=[
  rel:"Master-detail to Contact (roll-ups). Approver is a lookup to User so a standard approval process can route it.",
  fields:[
   ["Request Title","Name","Standard · Text(80)","Set by flow, Title Case","Annual Leave: 21 Dec To 31 Dec 2026","V4"],
-  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Amy Airman","V1,V4"],
+  ["Airman","Airman__c","Custom · Master-Detail(Contact)","","Jordan Rivera","V1,V4"],
   ["Leave Type","Leave_Type__c","Custom · Picklist","Annual Leave, Emergency Leave, Convalescent Leave, Parental Leave, Permissive TDY, Terminal Leave","Annual Leave","V4"],
   ["Status","Status__c","Custom · Picklist","Draft, Pending Approval, Approved, Denied, Cancelled, Completed","Pending Approval","V1,V4"],
   ["Start Date","Start_Date__c","Custom · Date","","21 Dec 2026","V4"],
@@ -316,7 +316,7 @@ const OBJECTS=[
  notes:["Scheduled flow sets Status to Completed after End Date so the Next Leave roll-up stays correct.","Approval: the case worker approves or denies in one click from the record (Approve and Deny buttons). A comment is optional and saves to Decision Comments. Notification back to the Airman on decision. No commander login in the demo (lead SE review, 23 Nov)."],
  layout:{glyph:"☂",title:"Annual Leave: 21 Dec To 31 Dec 2026",badges:[["Pending Approval","Waiting on the commander's decision."],["Annual Leave","Leave type."]],
   path:{values:["Draft","Pending Approval","Approved","Completed"],current:1},
-  keys:[["Airman","Amy Airman"],["Start","21 Dec 2026"],["End","31 Dec 2026"],["Chargeable Days","11"],["Remaining Balance","31.5"]],
+  keys:[["Airman","Jordan Rivera"],["Start","21 Dec 2026"],["End","31 Dec 2026"],["Chargeable Days","11"],["Remaining Balance","31.5"]],
   sections:[["Request",["Leave_Type__c","Start_Date__c","End_Date__c","Chargeable_Days__c","Leave_Address__c","Leave_Phone__c","Remarks__c"]],["Approval",["Approver__c","Submitted_On__c","Submitted_Via__c","Decision_Date__c","Decision_Comments__c"]],["Balance",["Balance_At_Submission__c","Remaining_Balance__c","Is_Upcoming__c"]]],
   related:[{title:"Approval History",cols:["Step","Approver","Status","Date"],rows:[["Case Worker Approval","Marcus Hale","Pending","23 Nov 2026"]]}]}
 },
@@ -326,7 +326,7 @@ const OBJECTS=[
  rel:"Master-detail to Contact through the existing Personnel field. Lookup to Base (Account) exists. The existing Fitness Assessment Appeal and Fitness Improvement Plan objects are not part of this demo.",
  fields:[
   ["Assessment Number","Name","Existing · Auto Number","Existing as an auto number. Demo names are system-generated, which is the one exception to the Title Case naming rule","FA-0000412","V5"],
-  ["Personnel","Personnel__c","Existing · Master-Detail(Contact)","Airman. Same master-detail pattern the roll-ups need","Amy Airman","V1,V5"],
+  ["Personnel","Personnel__c","Existing · Master-Detail(Contact)","Airman. Same master-detail pattern the roll-ups need","Jordan Rivera","V1,V5"],
   ["Base","Base__c","Existing · Lookup(Account)","Testing base","Travis AFB","V5"],
   ["Fitness Assessment Status","Fitness_Assessment_Status__c","Existing · Picklist","Values to confirm in the org; proposed set: Scheduled, Completed, Cancelled, No Show","Completed","V1,V5"],
   ["Requested Assessment Date","Requested_Assessment_Date__c","Existing · Date/Time","Appointment the Airman books. Rolls up (MIN) to Contact for Scheduled records","14 Dec 2026 08:00","V5"],
@@ -360,7 +360,7 @@ const OBJECTS=[
  notes:["Read from the a1agent org: the existing object already uses Personnel as master-detail to Contact, so the roll-ups work with no model change. Existing field API names are kept so this can be moved between orgs.","Existing picklist values were not read. Items marked 'to confirm' will be checked against the org before the build.","Decided by the lead SE (23 Nov): the Fitness Assessment Appeal and Fitness Improvement Plan objects are not built.","Next Due Date and the Contact roll-ups read Completion Date and Requested Assessment Date. If policy gives different cycles by rating, change the flow that sets the due date."],
  layout:{glyph:"★",title:"FA-0000412",badges:[["Completed","Assessment was performed and scored."],["Excellent","Fitness category derived from the composite score."]],
   path:{values:["Scheduled","Completed"],current:1,done:true},
-  keys:[["Personnel","Amy Airman"],["Completed","02 Dec 2025"],["Composite Score","92.5"],["Category","Excellent"],["Next Due","02 Dec 2026"]],
+  keys:[["Personnel","Jordan Rivera"],["Completed","02 Dec 2025"],["Composite Score","92.5"],["Category","Excellent"],["Next Due","02 Dec 2026"]],
   sections:[["Result",["Completion_Date__c","Composite_Score__c","Fitness_Category__c","Fitness_Assessment_Due_Date__c","Base__c","Proctor__c"]],["Components",["Cardio_Test__c","Cardio_Time__c","Cardio_Score__c","X1_Min_Push_ups__c","X1_Min_Push_up_Score__c","X1_Min_Sit_ups__c","X1_Min_Sit_up_Score__c","Forearm_Plank_Time__c","Forearm_Plank_Score__c"]],["Scheduling",["Fitness_Assessment_Status__c","Requested_Assessment_Date__c","Test_Slot__c"]]],
   related:[{title:"Assessment History",cols:["Assessment","Completed","Score","Category"],rows:[["FA-0000412","02 Dec 2025","92.5","Excellent"],["FA-0000298","11 Nov 2024","88.0","Satisfactory"],["FA-0000151","05 Dec 2023","90.5","Excellent"]]}]}
 },
@@ -391,7 +391,7 @@ const OBJECTS=[
  layout:{glyph:"⏰",title:"Travis Fitness Center: 14 Dec 2026 0800",badges:[["Open","Seats are still available."],["Full Assessment","Slot type."]],
   keys:[["Installation","Travis AFB, CA"],["Start","14 Dec 2026 08:00"],["Seats Remaining","5"],["Capacity","12"]],
   sections:[["Slot",["Installation__c","Hosting_Unit__c","Location__c","Slot_Type__c","Start_Date_Time__c","End_Date_Time__c","Day_Of_Week__c"]],["Capacity",["Capacity__c","Seats_Booked__c","Seats_Remaining__c","Slot_Status__c","Is_Available__c"]],["Contact",["Proctor__c","Proctor_Phone__c","Instructions__c"]]],
-  related:[{title:"Booked Assessments",cols:["Airman","Status","Scheduled"],rows:[["Jordan Reyes","Scheduled","14 Dec 2026"],["Casey Bell","Scheduled","14 Dec 2026"]]}]}
+  related:[{title:"Booked Assessments",cols:["Airman","Status","Scheduled"],rows:[["Daniel Kim","Scheduled","14 Dec 2026"],["Casey Bell","Scheduled","14 Dec 2026"]]}]}
 }
 ];
 
@@ -487,7 +487,7 @@ function scopeSection(){
    <h3>Vignettes</h3>
    <table><thead><tr><th>ID</th><th>Vignette</th><th>Status</th><th>Data model impact</th></tr></thead><tbody>${v.map(r=>`<tr class="${r[2]==="In scope"?"":"excl"}"><td>${r[0]}</td><td>${r[1]}</td><td><span class="badge" style="background:${r[2]==="In scope"?"#1f8f5a":"#6b7280"}">${r[2]}</span></td><td>${r[3]}</td></tr>`).join("")}</tbody></table>
    <h3>Personas</h3><div class="cols">
-    <div class="mini"><b>Amy Airman (Golden Airman)</b>Experience Cloud user tied to her Contact. E-5, active duty, 3D1X2.</div>
+    <div class="mini"><b>Jordan Rivera (Golden Airman)</b>Experience Cloud user tied to their Contact. E-5, active duty, 3D1X2.</div>
     <div class="mini"><b>Marcus Hale (Case Worker)</b>Internal console user on the System Administrator profile, so Setup is one click away. Works Orders Update cases and approves leave in one click, with an optional comment.</div>
     <div class="mini"><b>Commander (left out for now)</b>No commander persona or login. Reports To on the Contact still holds the commander for display. Can be added later as a third persona.</div></div>
    <h3>Modeling decisions taken from the 23 Nov meeting</h3><ul>
@@ -540,8 +540,9 @@ function accessSection(){
   return `<section class="card" id="access">${head("access","Identity And Access")}<div class="body">
    <p>Permissions are assigned in the same deploy as each object. Nothing is built until this section is approved.</p>
    ${sortTable(["Who","Account type","Access"],rows)}
-   <div class="note">Open question for the lead SE: which Experience Cloud license for Amy (Customer Community Plus vs Partner)? Master-detail children inherit the Contact's sharing, so the choice drives the sharing set. Default proposal: Customer Community Plus with a sharing set on Contact.</div>
-   <div class="note">Mock CAC login: handled in the portal (Justin's pattern). Amy still authenticates with a standard Experience Cloud user behind it.</div>
+   <div class="note">Open question for the lead SE: which Experience Cloud license for Jordan (resolved: Customer Community Plus Login-style portal license, no Task access, so to-dos are the Action Item object)? Master-detail children inherit the Contact's sharing, so the choice drives the sharing set. Default proposal: Customer Community Plus with a sharing set on Contact.</div>
+   <div class="note">Built differences: to-dos are a custom Action Item object (Airman master-detail to Contact), because the portal license cannot read the standard Task object. Case statuses and origins use the shared standard values.</div>
+   <div class="note">Mock CAC login: handled in the portal (Justin's pattern). Jordan still authenticates with a standard Experience Cloud user behind it.</div>
   </div>${reviewBox("access")}</section>`;
 }
 
